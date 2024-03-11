@@ -5,15 +5,26 @@ import { redirect } from "next/navigation";
 
 export default async function AddPage({params}){
     const {auid}=params;
-    const dept=await getDepartmentbyName();
-    const author=await getAllAuthor();
+    let dept;
+    let author;
     const session=await auth();
-    if(!(session && session.user && session.user.email && session.scopusID)){
+    if((session && session.user.email && session.scopusID && session.scopusID===auid && session.role==="Author")){
+        dept=await getDepartmentbyName();
+        author=await getAllAuthor();
+        return(
+            <>
+                <AddProject dept={dept} author={author} auid={auid}/>
+            </>
+        )
+    }else if(session && session.user.email && (session.role==="Admin" || session.role==="Super_Admin")){
+        dept=await getDepartmentbyName();
+        author=await getAllAuthor();
+        return(
+            <>
+                <AddProject dept={dept} author={author} auid={auid}/>
+            </>
+        )
+    }else{
         redirect('/');
     }
-    return(
-        <>
-            {(session && session.user && session.user.email && session.scopusID) && <AddProject dept={dept} author={author} auid={auid}/>}
-        </>
-    )
 }

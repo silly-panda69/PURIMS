@@ -9,16 +9,21 @@ export async function POST(req){
         const user=await checkVerify(email);
         if(user){
             const result=await fetchToken(email);
-            const isMatched=await bcrypt.compareSync(token,result);
-            if(isMatched){
-                const response=await insertVerified(email);
-                if(response){
-                    return NextResponse.json({msg: "OTP verified successfully!",success: true});
+            if(result){
+                const isMatched=await bcrypt.compareSync(token,result);
+                if(isMatched){
+                    const response=await insertVerified(email);
+                    if(response){
+                        return NextResponse.json({msg: "OTP verified successfully!",success: true});
+                    }else{
+                        return NextResponse.json({msg: "Error verifying!",success: false});
+                    }
                 }else{
-                    return NextResponse.json({msg: "Error verifying!",success: false});
+                    return NextResponse.json({msg: "Invalid OTP!",success: false})
                 }
             }else{
-                return NextResponse.json({msg: "Invalid OTP!",success: false})
+                return NextResponse.json({msg: "Invalid...",success: false})
+
             }
         }else{
             return NextResponse.json({msg: "You are not registered!",success: false})

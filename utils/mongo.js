@@ -1430,7 +1430,8 @@ export const checkUserID=async(scopusID)=>{
 export const insertScopusID=async(email,scopusID)=>{
   const result=await users.updateOne({email},{
     $set: {
-      scopusID: scopusID
+      scopusID: scopusID,
+      role: "Super_Admin",
     }
   });
   if(result){
@@ -1470,7 +1471,6 @@ export const askToken=async(email,token)=>{
       token: token
     },
   },{upsert: true});
-  console.log(result);
   if(result){
     if(result.modifiedCount || result.upsertedCount){
       return true;
@@ -1656,4 +1656,5 @@ export const authorwisephds = cache(
     // console.log('Result:', resultphds);
   }
 );
+
 

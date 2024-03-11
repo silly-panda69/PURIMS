@@ -41,23 +41,28 @@ const AddProject = ({ dept, author ,auid }) => {
     }
     //add data to copi from temp
     const addHandler1=()=>{
-        const user=author.filter((item)=>item._id===temp);
-        const item=user[0];
-        setCopis([...copis,
-            {
-                name: item.profile.lastName+", "+(item.profile.middleName?item.profile.middleName:"")+" "+item.profile.firstName,
-                scopusID: item._id
-            }
-        ]);
-        // setCopis(copis.filter(function(item,index,inputArr){
-        //     return inputArr.indexOf(item)==index;
-        // }));
-        setTemp("");
+        if(temp){
+            const user=author.filter((item)=>item._id===temp);
+            const item=user[0];
+            setCopis([...copis,
+                {
+                    name: item.profile.lastName+", "+(item.profile.middleName?item.profile.middleName:"")+" "+item.profile.firstName,
+                    scopusID: item._id
+                }
+            ]);
+            // setCopis(copis.filter(function(item,index,inputArr){
+            //     return inputArr.indexOf(item)==index;
+            // }));
+            setTemp("");
+        }
     }
     //add data to copi from custom
     const addHandler2=()=>{
-        setCopis([...copis,{name: custom}]);
-        console.timeLog(copis);
+        if(custom){
+            setCopis([...copis,{name: custom}]);
+            setTemp("");
+            console.timeLog(copis);
+        }
     }
     //post fetch data
     const sendHanlder=async()=>{
@@ -108,6 +113,7 @@ const AddProject = ({ dept, author ,auid }) => {
                 setCustom("");
                 setTemp("");
                 router.push(`/author/${auid}/projects`);
+                router.refresh();
             }
             setMsg(data.msg);
         }catch(err){

@@ -2,6 +2,7 @@ import { insertToken,insertUser,checkUser } from "@/utils/mongo";
 import { NextResponse } from "next/server";
 const bcrypt=require("bcryptjs");
 const nodemailer=require('nodemailer');
+import {authenticator, hotp } from "otplib";
 
 export async function POST(req){
     const {email,password}=await req.json();
@@ -14,8 +15,12 @@ export async function POST(req){
             const hashPassword=await bcrypt.hashSync(password,salt);
             const user=await insertUser(email,hashPassword);
             if(user){
-                const otp="1234";
-                const hashOtp=await bcrypt.hashSync(otp,salt);
+                authenticator.options={digits: 4};
+                hotp.options={digits: 4};
+                const date=new Date();
+                const custom=email+date;
+                const token=hotp.generate(custom,10);
+                const hashOtp=await bcrypt.hashSync(token,salt);
                 const verify=await insertToken(email,hashOtp);
                 const transporter = nodemailer.createTransport({
                     service: "Gmail",
@@ -31,8 +36,8 @@ export async function POST(req){
                     from: "uietpu092@gmail.com",
                     to: email,
                     subject: "Hello ✔",
-                    text: otp,
-                    html: `<b>Hello world? ${otp} </b>`, 
+                    text: token,
+                    html: `<b>Hello world? ${token} </b>`, 
                   });
                 return NextResponse.json({msg: "Registered successfully!",success: true});
             }else{

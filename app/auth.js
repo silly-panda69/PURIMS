@@ -21,16 +21,26 @@ export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
                     const result=await fetchUser(email);
                     if(result){
                         if(result.verified){
-                            if(result.scopusID){
-                                const isMatch=await bcrypt.compareSync(password,result.password);
-                                if(isMatch){
-                                    const user={email,password,role: "Author",scopusID: result.scopusID};
-                                    return user;
+                            if(result.role==="Author"){
+                                if(result.scopusID){
+                                    const isMatch=await bcrypt.compareSync(password,result.password);
+                                    if(isMatch){
+                                        const user={email,password,role: result.role,scopusID: result.scopusID};
+                                        return user;
+                                    }else{
+                                        return null;
+                                    }
                                 }else{
                                     return null;
                                 }
                             }else{
-                                return null;
+                                const isMatch=await bcrypt.compareSync(password,result.password);
+                                if(isMatch){
+                                    const user={email,password,role: result.role};
+                                    return user;
+                                }else{
+                                    return null;
+                                }
                             }
                         }else{
                             return null;
@@ -49,13 +59,17 @@ export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
             const isSigned=user?true:false;
             if(isSigned){
                 token.role=user.role;
-                token.scopusID=user.scopusID;
+                if(user.scopusID){
+                    token.scopusID=user.scopusID;
+                }
             }
             return Promise.resolve(token);
         },
         async session({session,token}){
             session.role=token.role;
-            session.scopusID=token.scopusID;
+            if(token.scopusID){
+                session.scopusID=token.scopusID;
+            }
             return Promise.resolve(session);
         }
     }
