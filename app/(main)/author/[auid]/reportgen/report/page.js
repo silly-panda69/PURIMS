@@ -34,6 +34,7 @@ import {
 	getCoauthors,
 	getDocs,
 	getMetrics,
+	fetchUserProject
 } from "@/utils/mongo";
 import TimePicker from "@/components/TimeRange";
 import alpha3 from "@/utils/alpha3";
@@ -64,7 +65,11 @@ export default async function AuthorView({ params = { auid: "" }, searchParams }
 	const { firstCount, lastCount, correspondingCount } = await getAuthorPositions(auid, searchParams);
 	const { TWEET_COUNT, FACEBOOK_COUNT } = await getAuthorSocialMetrics(auid, searchParams);
 
-	const totalFund= await deptprojectfund(authData.dept);
+	const {result,count}=await fetchUserProject(auid);
+	let projectFund=0;
+	result.forEach(item=>{
+	  projectFund+=item.amount_allocated;
+	})
 	
 	const totalphds=  await authorwisephds (authData.profile.firstName,authData.profile.lastName,authData.dept)
 	
@@ -180,14 +185,14 @@ export default async function AuthorView({ params = { auid: "" }, searchParams }
              
 			 <SocialCard
 						className="col-span-3 self-stretch"
-						stat={TWEET_COUNT}
-						statTitle={"Projects"}
+						stat={count}
+						statTitle={"Research Projects"}
 						Icon={<Research_icon />}
 						showRankings={!(searchParams.from && searchParams.to)}
 					/>
 			   <SocialCard
 						className="col-span-3 self-stretch"
-						stat={totalFund}
+						stat={projectFund}
 						statTitle={"Research Funds"}
 						statDesc="Research funds generated"
 						Icon={<research_fund />}

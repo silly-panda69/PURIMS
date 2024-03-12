@@ -23,6 +23,7 @@ import ScopusIcon from "@/icons/Scopus";
 import {
   authorwisephds,
   deptprojectfund,
+  fetchUserProject,
   getAuthor,
   getAuthorMetrics,
   getAuthorPositions,
@@ -60,8 +61,7 @@ export default async function AuthorView({
     from: searchParams.from,
     to: searchParams.to,
   });
-  const research_fund= await deptprojectfund(authData.dept);
-  const totalFund= research_fund.length > 0 ? research_fund[0].totalFund : 0  ;
+  
   const totalphds=  await authorwisephds (authData.profile.firstName,authData.profile.lastName,authData.dept)
   
   const authorMetrics = await getMetrics(
@@ -107,6 +107,11 @@ export default async function AuthorView({
         t.value,
     0
   );
+  const {result,count}=await fetchUserProject(auid);
+  let projectFund=0;
+  result.forEach(item=>{
+    projectFund+=item.amount_allocated;
+  })
   return (
     <>
       <StatCard
@@ -226,7 +231,7 @@ export default async function AuthorView({
       <SocialCard
           Icon={<Research_icon width={48} height={48}/>}
           className="xl:col-span-3 md:col-span-4 col-span-6 self-stretch h-[148px]"
-          stat={authorMetrics.crossrefCitations}
+          stat={count}
           statTitle="Research Projects"
           statDesc="All research project granted"
           margin="mt-4"
@@ -242,7 +247,7 @@ export default async function AuthorView({
       <SocialCard
           Icon={<Fund_icon width={48} height={48} />}
           className="xl:col-span-3 md:col-span-4 col-span-6 self-stretch h-[148px]"
-          stat={totalFund}
+          stat={projectFund}
           statTitle="Research Funds"
           statDesc="Research funds generated"
           margin="mt-4"

@@ -464,12 +464,17 @@ export const getMetrics = cache(async ({ auid, dept }, { from, to } = {}) => {
     crossrefCitations: aggr.crossrefCitations,
   };
 
-  if (dept) {
+  if (dept==="pu") {
     result.projects = {
-      planned: await projects.countDocuments({
-        department: dept,
-        status: "planned",
+      ongoing: await projects.countDocuments({
+        status: "ongoing",
       }),
+      completed: await projects.countDocuments({
+        status: "completed",
+      }),
+    };
+  }else if(dept!=="pu"){
+    result.projects = {
       ongoing: await projects.countDocuments({
         department: dept,
         status: "ongoing",
@@ -477,10 +482,6 @@ export const getMetrics = cache(async ({ auid, dept }, { from, to } = {}) => {
       completed: await projects.countDocuments({
         department: dept,
         status: "completed",
-      }),
-      stalled: await projects.countDocuments({
-        department: dept,
-        status: "stalled",
       }),
     };
   }
@@ -1326,8 +1327,8 @@ export const insertOneProject = async(
   to,
   principal_name,
   principal_scopusID,
-  amount_allocated,
-  amount_received,
+  allocated,
+  received,
   installment,
   funding_agency,
   industry_partner,
@@ -1340,8 +1341,8 @@ export const insertOneProject = async(
     status,
     department,
     description,
-    amount_allocated,
-    amount_received,
+    amount_allocated: allocated,
+    amount_received: received,
     installment,
     funding_agency,
     industry_partner,
@@ -1378,8 +1379,8 @@ export const updateOneProject=async(
   to,
   principal_name,
   principal_scopusID,
-  amount_allocated,
-  amount_received,
+  allocated,
+  received,
   installment,
   funding_agency,
   industry_partner,
@@ -1395,8 +1396,8 @@ export const updateOneProject=async(
       status: status,
       department: department,
       description: description,
-      amount_allocated: amount_allocated,
-      amount_received: amount_received,
+      amount_allocated: allocated,
+      amount_received: received,
       installment: installment,
       funding_agency: funding_agency,
       industry_partner: industry_partner,
@@ -1496,7 +1497,7 @@ export const univprojectfund = cache(async () => {
         $group: {
           _id: null,
           totalFund: {
-            $sum: "$amount_sanctioned.amount",
+            $sum: "$amount_allocated",
           },
         },
       },
@@ -1542,7 +1543,7 @@ export const deptprojectfund = cache(async (dept) => {
       ? [
           {
             $match: {
-              dept: dept,
+              department: dept,
             },
           },
         ]
@@ -1551,7 +1552,7 @@ export const deptprojectfund = cache(async (dept) => {
         $group: {
           _id: null,
           totalFund: {
-            $sum: "$amount_sanctioned.amount",
+            $sum: "$amount_allocated",
           },
         },
       },
@@ -1656,5 +1657,7 @@ export const authorwisephds = cache(
     // console.log('Result:', resultphds);
   }
 );
+
+
 
 

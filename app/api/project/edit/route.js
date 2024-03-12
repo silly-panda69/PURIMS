@@ -21,6 +21,8 @@ export async function POST(req) {
         id,
     } = await req.json();
     if(title && status && dept && description && from && to && principal_name && principal_scopusID && amount_allocated && amount_received && installment && funding_agency && industry_partner && deliverables && copis){
+        const allocated=parseInt(amount_allocated);
+        const received=parseInt(amount_received);
         const result=await updateOneProject(
             title,
             status,
@@ -30,8 +32,8 @@ export async function POST(req) {
             to,
             principal_name,
             principal_scopusID,
-            amount_allocated,
-            amount_received,
+            allocated,
+            received,
             installment,
             funding_agency,
             industry_partner,
