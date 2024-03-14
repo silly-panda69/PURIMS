@@ -458,6 +458,15 @@ details.open-card[open] {
 	gap: 10px;
 }
 
+.user-page2{
+	height: 83.4vh;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	gap: 10px;
+}
+
 .login-page{
 	width: 300px;
 	display: flex;
@@ -551,6 +560,7 @@ details.open-card[open] {
 	align-items: center;
 	text-align: center;
 	border-radius: 3px;
+	outline: none;
 }
 
 .popup{

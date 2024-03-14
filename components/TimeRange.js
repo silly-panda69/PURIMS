@@ -6,8 +6,8 @@ import Card from "./UI/Card";
 import CardContent from "./UI/CardContent";
 
 export default function TimePicker({ min = 1947, max = 2024, fromD = 1947, toD = 2024, subject }) {
-	let [from, setFrom] = useState(`${fromD > min ? fromD : min}-01-01`);
-	let [to, setTo] = useState(`${toD < max ? toD : max}-12-31`);
+	let [from, setFrom] = useState(`${fromD > min ? fromD : min}-01`);
+	let [to, setTo] = useState(`${toD < max ? toD : max}-12`);
 	return (
 		<div className="text-center col-span-12">
 			<div className="my-6">
@@ -17,18 +17,18 @@ export default function TimePicker({ min = 1947, max = 2024, fromD = 1947, toD =
 				<div className="big-text">
 					From:{" "}
 					<input
-						min={`${min}-01-01`}
-						max={`${max}-12-31`}
-						type="date"
+						min={`${min}-01`}
+						max={`${max}-12`}
+						type="month"
 						value={from}
 						onChange={(e) => setFrom(e.target.value)}
 						style={{ backgroundColor: "inherit", marginRight: "64px" }}
 					/>{" "}
 					To:{" "}
 					<input
-						min={`${min}-01-01`}
-						max={`${max}-12-31`}
-						type="date"
+						min={`${min}-01`}
+						max={`${max}-12`}
+						type="month"
 						value={to}
 						onChange={(e) => setTo(e.target.value)}
 						style={{ backgroundColor: "inherit" }}

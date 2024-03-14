@@ -1245,6 +1245,25 @@ export const checkVerify = async (email) => {
   }
 }
 
+//export const check user and verified
+export const checkVerification = async (email) => {
+  const result = await users.findOne({ email: email });
+  if (result) {
+    if (result.verified === true) {
+      if(!result.scopusID){
+        return true;
+      }else{
+        return false;
+      }
+    } else {
+      return false;
+    }
+  } else {
+    return false;
+  }
+}
+
+
 //fetch otp
 export const fetchToken = async (email) => {
   const result = await verification.findOne({ email: email });
@@ -1432,7 +1451,7 @@ export const insertScopusID=async(email,scopusID)=>{
   const result=await users.updateOne({email},{
     $set: {
       scopusID: scopusID,
-      role: "Super_Admin",
+      role: "Author",
     }
   });
   if(result){

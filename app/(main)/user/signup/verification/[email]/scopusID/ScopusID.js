@@ -28,7 +28,6 @@ const ScopusID = ({email}) => {
             }
         }
         catch (err) {
-            console.log(err);
             setMsg("Error Registering...");
         }
         setTimeout(() => {

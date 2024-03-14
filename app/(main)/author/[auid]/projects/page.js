@@ -52,7 +52,7 @@ export default async function ProjectPage({ params }) {
                                                 justifyContent: "space-between",
                                             }}
                                         >
-                                            <Link href={"/"} className="link text-3xl font-bold">
+                                            <Link href={`/projects/${project._id}`} className="link text-3xl font-bold">
                                                 {project.title}
                                             </Link>
                                             <div className="text-1xl" style={{display: "flex",alignContent:"center",justifyContent:"center",gap: "20px"}}>
