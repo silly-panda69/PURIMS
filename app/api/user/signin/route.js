@@ -30,8 +30,6 @@ export async function POST(req){
                         service: "Gmail",
                         secure: false,
                         auth: {
-                          user: "uietpu092@gmail.com",
-                          pass: "kqfnznxjosmfvyva",
                         },
                       });
                     const info = await transporter.sendMail({
