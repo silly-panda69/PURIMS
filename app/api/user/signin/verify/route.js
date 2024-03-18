@@ -4,6 +4,7 @@ import { NextResponse } from "next/server";
 import {authenticator, hotp } from "otplib";
 const nodemailer=require('nodemailer');
 
+//resend otp
 export async function POST(req){
     const {email}=await req.json();
     if(email){
@@ -15,17 +16,18 @@ export async function POST(req){
             const date=new Date();
             const custom=email+date;
             const otp=hotp.generate(custom,10);
-            console.log(otp);
             const salt=await bcrypt.genSaltSync(10);
-            const token=await bcrypt.hashSync(otp);
+            const token=await bcrypt.hashSync(otp,salt);
             const result=await askToken(email,token);
             if(result){
-                const transporter = nodemailer.createTransport({
+                  const transporter = nodemailer.createTransport({
                     service: "Gmail",
                     host: "smtp.gmail.com",
                     port: 465,
                     secure: true,
                     auth: {
+                      user: "uietpu092@gmail.com",
+                      pass: "kqfnznxjosmfvyva",
                     },
                   });
                   const info = transporter.sendMail({

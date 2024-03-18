@@ -35,7 +35,7 @@ export default async function ProjectList({ data, page = 1, pageSize = 25, total
 									</Link>
 								</div>
 							</div>
-							<div className="mt-4">{project.description}</div>
+							<div style={{height: "15px",overflow: "hidden"}} className="mt-4">{project.description}</div>
 						</div>
 					</CardContent>
 				</Card>

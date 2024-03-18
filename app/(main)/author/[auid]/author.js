@@ -32,7 +32,7 @@ export default async function Author({ data, ...props }) {
           <div className="group mt-2 relative">
             {data.llm ||
               `Lorem ipsum, dolor sit amet consectetur adipisicing elit. Natus ea rerum suscipit alias. Et nulla ut blanditiis sit quam. Quaerat architecto autem ipsum quidem odio ducimus ex vitae, ea a. Error quo minima voluptatibus alias perferendis maiores consequatur. At consequuntur dolore labore maiores deleniti reiciendis autem id ab nesciunt exercitationem vitae!`}
-            <span className="absolute left-10 top-0 opacity-0 group-hover:opacity-100 bg-yellow-200 text-red-800 m-auto  py-1 px-2 rounded-md transition-opacity duration-300">
+            <span style={{bottom: "90px",right: "30px"}} className="absolute group-hover:opacity-100 opacity-0 bg-zinc-700  m-auto  py-1 px-2 rounded-md transition-opacity duration-300">
               This is AI generated text
             </span>
           </div>

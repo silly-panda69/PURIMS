@@ -14,11 +14,9 @@ let sortTypes = [
 ];
 
 let statusTypes = [
+	["all", "All"],
 	["ongoing", "Ongoing"],
-	["planned", "Planned"],
 	["completed", "Completed"],
-	["stalled", "Stalled"],
-	["all", "All"]
 ]
 
 let orderTypes = [

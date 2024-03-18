@@ -90,7 +90,12 @@ const UpdatePage = ({ data, display }) => {
               />
             ) : (
               <div className="profile-img">
-                there is no profile image!
+                <img
+                src={'/user_avatar.jpeg'}
+                style={{objectFit: "fill"}}
+                alt="Selected"
+                className="profile-img"
+              />
               </div>
             )}
           </div>

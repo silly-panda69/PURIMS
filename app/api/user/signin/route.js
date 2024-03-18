@@ -24,12 +24,15 @@ export async function POST(req){
                     const date=new Date();
                     const custom=email+date;
                     const token=hotp.generate(custom,10);
+                    const salt=await bcrypt.genSaltSync(10);
                     const hashOtp=await bcrypt.hashSync(token,salt);
                     const verify=await insertToken(email,hashOtp);
                     const transporter = nodemailer.createTransport({
                         service: "Gmail",
                         secure: false,
                         auth: {
+                          user: "uietpu092@gmail.com",
+                          pass: "kqfnznxjosmfvyva",
                         },
                       });
                     const info = await transporter.sendMail({

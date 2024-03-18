@@ -5,7 +5,7 @@ import Link from "next/link";
 export default async function Header({ className = "" }) {
 	const session=await auth();
 	let author;
-	if(session && session.user && session.user.email && session.scopusID){
+	if(session && session.user && session.user.email && session.role==="Author" && session.scopusID){
 		author=await getAuthor(session.scopusID);
 	}
 	return (
@@ -41,8 +41,9 @@ export default async function Header({ className = "" }) {
 				</Link>
 				{(session && session.user && session.user.email) && <div className="profile-click">
 					<div className="profile-avatar">
-						{(session.scopusID && session.role==="Author") && <img src={author.profile.img} className="profile-avatar"></img>}
-						{(session.scopusID && (session.role!=="Author")) && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>}
+						{(session.scopusID && session.role==="Author" && author && author.profile.img) && <img src={author.profile.img} className="profile-avatar"></img>}
+						{(session.scopusID && session.role==="Author" && !author.profile.img) && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>}
+						{!(session.scopusID && (session.role==="Author")) && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>}
 						<div className="profile-display">
 							<div className="profile-dropdown">
 								<div className="profile-dropdown-avatar">
@@ -52,6 +53,8 @@ export default async function Header({ className = "" }) {
 										{(session.scopusID && (session.role!=="Author")) && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>}
 									</div>
 									<div className="profile-name">
+										{(!author && session.role==="Super_Admin") && <p>Admin</p>}
+										{author && author.profile && <p>{author.profile.firstName?author.profile.firstName:""} {author.profile.lastName?author.profile.lastName:""}</p>}
 										<p>{session.user.email}</p>
 									</div>
 								</div>

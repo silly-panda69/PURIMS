@@ -134,7 +134,7 @@ export const getProjects = cache(
     dept = "pu",
     sort = "title",
     order = "ascending",
-    status = "ongoing",
+    status = "all",
     page = 1,
     pageSize = 25,
   } = {}) => {
@@ -1213,7 +1213,8 @@ export const checkUser = async (email) => {
 
 //insert user in the database
 export const insertUser = async (email, password) => {
-  const result = await users.insertOne({ email, password, verified: false });
+  const result = await users.insertOne({ email, password, verified: false, createdAt: new Date(), });
+  // const response = await users.createIndex({createdAt: 1},{expireAfterSeconds: 172800});
   if (result) {
     return true;
   } else {
@@ -1223,7 +1224,8 @@ export const insertUser = async (email, password) => {
 
 //insert otp into the verification collection
 export const insertToken = async (email, token) => {
-  const result = await verification.insertOne({ email, token });
+  const result = await verification.insertOne({ email, token, createdAt: new Date() });
+  const response = await verification.createIndex({createdAt: 1},{expireAfterSeconds: 5});
   if (result) {
     return true;
   } else {
@@ -1452,6 +1454,7 @@ export const insertScopusID=async(email,scopusID)=>{
     $set: {
       scopusID: scopusID,
       role: "Author",
+      createdAt: "",
     }
   });
   if(result){
@@ -1488,7 +1491,8 @@ export const insertVerified=async(email)=>{
 export const askToken=async(email,token)=>{
   const result=await verification.updateOne({email},{
     $set: {
-      token: token
+      token: token,
+      createdAt: new Date(),
     },
   },{upsert: true});
   if(result){

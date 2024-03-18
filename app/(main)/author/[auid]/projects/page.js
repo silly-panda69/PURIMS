@@ -101,7 +101,7 @@ export default async function ProjectPage({ params }) {
                                             </Link>
                                         </div>
                                     </div>
-                                    <div className="mt-4">{project.description}</div>
+                                    <div className="mt-4" style={{height: "20px",overflow: "hidden",textOverflow: "ellipsis"}}>{project.description}</div>
                                 </div>
                             </CardContent>
                         </Card>

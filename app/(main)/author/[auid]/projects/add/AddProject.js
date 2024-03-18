@@ -61,6 +61,7 @@ const AddProject = ({ dept, author ,auid }) => {
         if(custom){
             setCopis([...copis,{name: custom}]);
             setTemp("");
+            setCustom("");
             console.timeLog(copis);
         }
     }
