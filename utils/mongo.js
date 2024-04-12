@@ -2,7 +2,7 @@ import * as mongodb from "mongodb";
 import { cache } from "react";
 import { getSubject } from "./asjc";
 
-const uri="mongodb://localhost:27017";
+const uri = "mongodb://localhost:27017";
 const client = new mongodb.MongoClient(uri);
 const db = client.db("research");
 const departments = db.collection("departments");
@@ -360,18 +360,17 @@ export const getDepartment = cache(async (dept) => {
 
 export const getAuthorsByDept = cache(async (dept) => {
   let result;
-  if(dept === 'pu')
-   {
+  if (dept === 'pu') {
     result = await authors
-    .find()
-    .sort("citationCount", "descending")
-    .toArray();
-   }
-  else{
+      .find()
+      .sort("citationCount", "descending")
+      .toArray();
+  }
+  else {
     result = await authors
-    .find({ ...(dept && { dept }) })
-    .sort("citationCount", "descending")
-    .toArray();
+      .find({ ...(dept && { dept }) })
+      .sort("citationCount", "descending")
+      .toArray();
   }
   for (let auth of result) delete auth.charts;
   return result;
@@ -464,7 +463,7 @@ export const getMetrics = cache(async ({ auid, dept }, { from, to } = {}) => {
     crossrefCitations: aggr.crossrefCitations,
   };
 
-  if (dept==="pu") {
+  if (dept === "pu") {
     result.projects = {
       ongoing: await projects.countDocuments({
         status: "ongoing",
@@ -473,7 +472,7 @@ export const getMetrics = cache(async ({ auid, dept }, { from, to } = {}) => {
         status: "completed",
       }),
     };
-  }else if(dept!=="pu"){
+  } else if (dept !== "pu") {
     result.projects = {
       ongoing: await projects.countDocuments({
         department: dept,
@@ -1225,7 +1224,7 @@ export const insertUser = async (email, password) => {
 //insert otp into the verification collection
 export const insertToken = async (email, token) => {
   const result = await verification.insertOne({ email, token, createdAt: new Date() });
-  const response = await verification.createIndex({createdAt: 1},{expireAfterSeconds: 5});
+  const response = await verification.createIndex({ createdAt: 1 }, { expireAfterSeconds: 5 });
   if (result) {
     return true;
   } else {
@@ -1252,9 +1251,9 @@ export const checkVerification = async (email) => {
   const result = await users.findOne({ email: email });
   if (result) {
     if (result.verified === true) {
-      if(!result.scopusID){
+      if (!result.scopusID) {
         return true;
-      }else{
+      } else {
         return false;
       }
     } else {
@@ -1290,14 +1289,14 @@ export const fetchUser = async (email) => {
 export const fetchUserProject = async (auid) => {
   const result = await projects.find({
     $or: [
-      {"principal_scopusID": auid},
-      {"copis.scopusID": auid}
+      { "principal_scopusID": auid },
+      { "copis.scopusID": auid }
     ]
   }).toArray();
   const count = await projects.countDocuments({
     $or: [
-      {"principal_scopusID": auid},
-      {"copis.scopusID": auid}
+      { "principal_scopusID": auid },
+      { "copis.scopusID": auid }
     ]
   });
   return { result, count };
@@ -1339,7 +1338,7 @@ export const getAllAuthor = async () => {
   }
 }
 
-export const insertOneProject = async(
+export const insertOneProject = async (
   title,
   status,
   dept,
@@ -1355,9 +1354,9 @@ export const insertOneProject = async(
   industry_partner,
   deliverables,
   copis,
-)=>{
-  const department=dept;
-  const result=await projects.insertOne({
+) => {
+  const department = dept;
+  const result = await projects.insertOne({
     title,
     status,
     department,
@@ -1374,24 +1373,24 @@ export const insertOneProject = async(
     copis,
     deliverables,
   });
-  if(result && result.insertedId){
+  if (result && result.insertedId) {
     return true;
-  }else{
+  } else {
     return false;
   }
 }
 
-export const getOneProject=async(id)=>{
-  const objectId=new mongodb.ObjectId(id)
-  const result=await projects.findOne({_id: objectId});
-  if(result){
+export const getOneProject = async (id) => {
+  const objectId = new mongodb.ObjectId(id)
+  const result = await projects.findOne({ _id: objectId });
+  if (result) {
     return result;
-  }else{
+  } else {
     return null;
   }
 }
 
-export const updateOneProject=async(
+export const updateOneProject = async (
   title,
   status,
   dept,
@@ -1408,10 +1407,10 @@ export const updateOneProject=async(
   deliverables,
   copis,
   id,
-)=>{
-  const department=dept;
-  const objectId=new mongodb.ObjectId(id);
-  const result=await projects.updateOne({_id: objectId},{
+) => {
+  const department = dept;
+  const objectId = new mongodb.ObjectId(id);
+  const result = await projects.updateOne({ _id: objectId }, {
     $set: {
       title: title,
       status: status,
@@ -1430,78 +1429,79 @@ export const updateOneProject=async(
       deliverables: deliverables,
     }
   });
-  if(result){
+  if (result) {
     return true;
-  }else{
+  } else {
     return false;
   }
 }
 
 //check if the user is already registered or not
-export const checkUserID=async(scopusID)=>{
-  const result=await users.findOne({scopusID});
+export const checkUserID = async (scopusID) => {
+  const result = await users.findOne({ scopusID });
   //if user object exists
-  if(result){
+  if (result) {
     return true;
-  }else{
+  } else {
     return false;
   }
 }
 
 //update the user for scopus id
-export const insertScopusID=async(email,scopusID)=>{
-  const result=await users.updateOne({email},{
+export const insertScopusID = async (email, scopusID) => {
+  const result = await users.updateOne({ email }, {
     $set: {
       scopusID: scopusID,
       role: "Author",
       createdAt: "",
+      new: true,
     }
   });
-  if(result){
+  if (result) {
     return true;
-  }else{
+  } else {
     return false;
   }
 }
 
 //check if scopus id exists in db
-export const checkScopusID=async(scopusID)=>{
-  const result=await authors.findOne({_id: scopusID});
-  if(result){
+export const checkScopusID = async (scopusID) => {
+  const result = await authors.findOne({ _id: scopusID });
+  if (result) {
     return true;
-  }else{
+  } else {
     return false;
   }
 }
 
-export const insertVerified=async(email)=>{
-  const result=await users.updateOne({email},{
+export const insertVerified = async (email) => {
+  const result = await users.updateOne({ email }, {
     $set: {
       verified: true,
     }
   });
-  await verification.deleteOne({email});
-  if(result){
+  await verification.deleteOne({ email });
+  if (result) {
     return true;
-  }else{
+  } else {
     return false;
   }
 }
 
-export const askToken=async(email,token)=>{
-  const result=await verification.updateOne({email},{
+export const askToken = async (email, token) => {
+  const result = await verification.updateOne({ email }, {
     $set: {
       token: token,
       createdAt: new Date(),
     },
-  },{upsert: true});
-  if(result){
-    if(result.modifiedCount || result.upsertedCount){
+  }, { upsert: true });
+  if (result) {
+    if (result.modifiedCount || result.upsertedCount) {
       return true;
-    }else{
+    } else {
       return false;
     }
-  }else{
+  } else {
     return false;
   }
 }
@@ -1527,7 +1527,7 @@ export const univprojectfund = cache(async () => {
     ])
     .toArray();
 
-  return result.length > 0 ? result[0].totalFund : 0 ;
+  return result.length > 0 ? result[0].totalFund : 0;
 });
 
 //university  phds 
@@ -1550,7 +1550,7 @@ export const univphds = cache(async () => {
       },
     ])
     .toArray();
-  return  result.length > 0 ? result[0].phds : 0 ;
+  return result.length > 0 ? result[0].phds : 0;
 });
 
 //dept LEVEL CARD DATA FOR TOTAL PHDS,RESEARCH FUNDS,
@@ -1563,14 +1563,14 @@ export const deptprojectfund = cache(async (dept) => {
   const result = await projects
     .aggregate([
       ...(dept !== "pu"
-      ? [
+        ? [
           {
             $match: {
               department: dept,
             },
           },
         ]
-      : []),
+        : []),
       {
         $group: {
           _id: null,
@@ -1590,12 +1590,12 @@ export const deptwisephds = cache(async (dept) => {
     // If the department is not "pu," add the $match stage
     ...(dept !== "pu"
       ? [
-          {
-            $match: {
-              dept: dept,
-            },
+        {
+          $match: {
+            dept: dept,
           },
-        ]
+        },
+      ]
       : []),
     {
       $group: {
@@ -1615,7 +1615,7 @@ export const deptwisephds = cache(async (dept) => {
 
   const result = await shodhganga.aggregate(aggregationPipeline).toArray();
 
-  return result.length > 0 ? result[0].totalPhds : 0 ;
+  return result.length > 0 ? result[0].totalPhds : 0;
 });
 
 
@@ -1644,9 +1644,9 @@ export const authorwisephds = cache(
               "dc:contributor:guide_temp": {
                 $regex: lastName
                   ? new RegExp(
-                      `${firstName} ${lastName}|${lastName} ${firstName}|${firstName}, ${lastName}|${lastName}, ${firstName}`,
-                      "i"
-                    )
+                    `${firstName} ${lastName}|${lastName} ${firstName}|${firstName}, ${lastName}|${lastName}, ${firstName}`,
+                    "i"
+                  )
                   : new RegExp(`${firstName}`, "i"),
               },
             },
@@ -1681,6 +1681,207 @@ export const authorwisephds = cache(
   }
 );
 
+export const getProjects_notUser = async (auid) => {
+  const result = await projects.find({
+    $or: [
+      { "principal_scopusID": { $ne: auid } },
+      { "copis.scopusID": { $ne: auid } }
+    ]
+  }).toArray();
+  const count = await projects.countDocuments({
+    $or: [
+      { "principal_scopusID": { $ne: auid } },
+      { "copis.scopusID": { $ne: auid } }
+    ]
+  });
+  return { result, count };
+}
+
+export const updateUserProject = async (data, auid, name) => {
+  for (let i = 0; i < data.length; i++) {
+    if (data[i]?.role === "Pi") {
+      await projects.updateOne({ _id: new mongodb.ObjectId(data[i]?.id) }, {
+        $set: {
+          principal_name: name,
+          principal_scopusID: auid,
+        }
+      });
+    } else if (data[i]?.role === "Co-Pi") {
+      await projects.updateOne({ _id: new mongodb.ObjectId(data[i]?.id) }, {
+        $push: {
+          copis: {
+            name: name,
+            scopusID: auid,
+          }
+        }
+      })
+    }
+  }
+  return true;
+}
+
+export const updateNewUser = async (auid) => {
+  const result = await users.updateOne({ scopusID: auid }, {
+    $set: {
+      new: false
+    }
+  })
+  if (result) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+export const checkNewUser = async (auid) => {
+  const result = await users.findOne({ scopusID: auid });
+  if (result?.new) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+export const insertDocuments = async (data,response,scopusID) => {
+  try{
+    for(let i=0;i<data.length;i++){
+      console.log('yes')
+      await documents.insertOne({
+          _id: data[i]['dc:identifier'].split("SCOPUS_ID:")[1],
+          scopousId: data[i]['dc:identifier'].split("SCOPUS_ID:")[1],
+          citedByCount: data[i]['cited-by-count'],
+          title: data[i]["dc:title"],
+          description: "",
+          eid: data[i]['eid'],
+          doi: data[i]["prism:doi"],
+          subType: data[i]["subtype"],
+          source: {
+              aggregationType: "",
+              coverDate: data[i]["prism:coverDate"],
+              issn: [data[i]['prism:issn']],
+              pageRange: data[i]["pageRange"],
+              publicationName: data[i]["prism:publicationName"],
+              volume: data[i]["prism:volume"],
+              subType: data[i]["subtype"],
+              sourceID: data[i]["source-id"],
+          },
+          openAccess: (data[i]["openaccess"]==="0")?"false":"true",
+          subjectAreas: [],
+          hasFundingInfo: false,
+          fundingText: "",
+          authors: [
+              {
+                  givenName: response['author-retrieval-response'][0]["author-profile"]['preferred-name']['given-name'],
+                  initials: response['author-retrieval-response'][0]["author-profile"]['preferred-name']['given-name'],
+                  surname: response['author-retrieval-response'][0]["author-profile"]['preferred-name']['surname'],
+                  indexedName: response['author-retrieval-response'][0]["author-profile"]['preferred-name']['surname'],
+                  auid: scopusID,
+                  seq: 0,
+                  affiliation: [
+                     {
+                      adID: "60018526",
+                      dptID: "103950656",
+                      organization: [
+                          response['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["sort-name"],
+                          "pu"
+                      ],
+                      country: "ind",
+                      city: "Chandigarh",
+                      postalCode: 160014,
+                     }
+                  ],
+                  inDB: false,
+              }
+  
+          ],
+          plum: [
+              {
+                  name: 0,
+                  total: 0,
+                  count_types: [
+  
+                  ]
+              }
+          ],
+          crossref: {
+              citedByCount: 0,
+              funder: [
+                  {
+                      DOI: "",
+                      name: "",
+                      "doi-asserted-by": "",
+                      award: [],
+                  }
+  
+              ]
+          },
+          departments: [
+              {}
+          ],
+          coverDate: data[i]["coverDate"],
+          correspondence: [],
+          authorCount: 0,
+          refCount: 0,
+          reference: [],
+          authorIDs: [
+              scopusID,
+          ]
+      })
+  }
+  }catch(err){
+    console.log(err)
+  }
+  return true;
+}
+
+export const insertAuthors = async (data, scopusID) => {
+  const result = await authors.insertOne({
+    _id: scopusID,
+    scopusID: scopusID,
+    pfnum: null,
+    profile: {
+      title: "Professor",
+      firstName: data['author-retrieval-response'][0]["author-profile"]['preferred-name']['given-name'],
+      middleName: "",
+      lastName: data['author-retrieval-response'][0]["author-profile"]['preferred-name']['surname'],
+      mobile: "",
+      email: "sky6alan",
+    },
+    dept: data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["sort-name"],
+    coauthors: [
+
+    ],
+    citationCount: Number(data['author-retrieval-response'][0]["coredata"]["citation-count"]),
+    citedByCount: Number(data['author-retrieval-response'][0]["coredata"]["cited-by-count"]),
+    eid: data['author-retrieval-response'][0]["coredata"]['eid'],
+    subjectAreas: data['author-retrieval-response'][0]['subject-areas']['subject-area'],
+    openAccessCount: 0,
+    docCount: Number(data['author-retrieval-response'][0]["coredata"]['document-count']),
+    hIndex: 0,
+    i10Index: 0,
+    correspondingCount: 0,
+    firstAuthorCount: 0,
+    lastAuthorCount: 0,
+    middleAuthorCount: 0,
+    rank: {
+
+    },
+    deptRank: {
+
+    },
+    plum: {
+
+    },
+    crossrefCitations: 0,
+    fundedCount: 0,
+    llm: ""
+  });
+  if (result) {
+    return true;
+  } else {
+    return false;
+  }
+}
 
 
 

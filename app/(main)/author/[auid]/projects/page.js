@@ -1,19 +1,28 @@
-import { fetchUserProject } from "@/utils/mongo";
+import { checkNewUser, fetchUserProject, getProjects_notUser } from "@/utils/mongo";
 import CardContent from "@/components/UI/CardContent";
 import Card from "@/components/UI/Card";
 import Link from "next/link";
 import DeleteButton from "./DeleteButton";
 import { auth } from "@/app/auth";
+import NewUser from "./NewUser";
 
 export default async function ProjectPage({ params }) {
     const { auid } = params;
     const project = await fetchUserProject(auid);
-    const { result, count } = project;
     const session=await auth();
-    console.log(auid);
+    let newUser="";
+    if(session?.role==="Author" && session?.scopusID){
+        newUser=await checkNewUser(auid);
+    }else{
+        newUser=false;
+    }
+    const otherProject = await getProjects_notUser(auid);
+    const { result, count } = project;
+    console.log(newUser);
     return (
         <main className="grid-12 max-w-7xl w-screen mx-auto ">
-            <div className="col-span-12 self-stretch me-8">
+            {(newUser && session?.role==="Author" && session?.scopusID===auid) && <NewUser session={session} newUser={newUser} otherProject={otherProject} ></NewUser>}
+            {!(newUser) && <div className="col-span-12 self-stretch me-8">
                 <CardContent>
                     <div style={{display:"flex",justifyContent: "space-between",alignItems:"center"}}>
                         <h2>
@@ -106,7 +115,7 @@ export default async function ProjectPage({ params }) {
                             </CardContent>
                         </Card>
                     ))}
-            </div>
+            </div>}
         </main>
     );
 }

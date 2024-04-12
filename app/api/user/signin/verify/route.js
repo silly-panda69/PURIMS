@@ -11,10 +11,11 @@ export async function POST(req){
         //check if the user exists
         const user=await checkUser(email);
         if(user===false){
+          const secret="skarmsinghayyangs";
             authenticator.options={digits: 4};
             hotp.options={digits: 4};
             const date=new Date();
-            const custom=email+date;
+            const custom=email+date+secret;
             const otp=hotp.generate(custom,10);
             const salt=await bcrypt.genSaltSync(10);
             const token=await bcrypt.hashSync(otp,salt);
