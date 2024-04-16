@@ -19,11 +19,10 @@ export async function POST(req){
                 const hashPassword=await bcrypt.hashSync(password,salt);
                 const user=await insertUser(email,hashPassword);
                 if(user){
+                  const secret=process.env.HASH_SECRET;
                     authenticator.options={digits: 4};
                     hotp.options={digits: 4};
-                    const date=new Date();
-                    const custom=email+date;
-                    const token=hotp.generate(custom,10);
+                    const token=hotp.generate(secret,10);
                     const salt=await bcrypt.genSaltSync(10);
                     const hashOtp=await bcrypt.hashSync(token,salt);
                     const verify=await insertToken(email,hashOtp);
@@ -31,12 +30,12 @@ export async function POST(req){
                         service: "Gmail",
                         secure: false,
                         auth: {
-                          user: "uietpu092@gmail.com",
-                          pass: "kqfnznxjosmfvyva",
+                          user: process.env.MAIL_URL,
+                          pass: process.env.MAIL_SECRET,
                         },
                       });
                     const info = await transporter.sendMail({
-                        from: "uietpu092@gmail.com",
+                        from: process.env.MAIL_URL,
                         to: email,
                         subject: "Confirm your email address",
                         text: "Please verify your email address by entering the follwing verification code!",

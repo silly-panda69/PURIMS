@@ -28,12 +28,12 @@ export async function POST(req) {
                   port: 465,
                   secure: true,
                   auth: {
-                    user: "uietpu092@gmail.com",
-                    pass: "kqfnznxjosmfvyva",
+                    user: process.env.MAIL_URL,
+                    pass: process.env.MAIL_SECRET,
                   },
                 });
                 const info = transporter.sendMail({
-                  from: "uietpu092@gmail.com",
+                  from: process.env.MAIL_URL,
                   to: email,
                   subject: `hello`,
                   text: "",
