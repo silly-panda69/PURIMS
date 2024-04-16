@@ -2,7 +2,7 @@ import * as mongodb from "mongodb";
 import { cache } from "react";
 import { getSubject } from "./asjc";
 
-const uri = "mongodb://localhost:27017";
+const uri = process.env.MONGO_DB_URI;
 const client = new mongodb.MongoClient(uri);
 const db = client.db("research");
 const departments = db.collection("departments");

@@ -4,7 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 const bcrypt = require("bcryptjs");
 
 export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
-    secret: "mmfB42DIO8gymsW2hGzBw9u4OxT7abJ3wLSRyqKxJPk=",
+    secret: process.env.NEXT_AUTH_SECRET,
     session: {
         strategy: "jwt",
     },
