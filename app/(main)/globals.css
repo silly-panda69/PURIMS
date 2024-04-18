@@ -527,12 +527,10 @@ details.open-card[open] {
 }
 
 .user-options{
-	display: flex;
-	gap: 6px;
 }
 
 .user-options a{
-	color: blue;
+	color: blue
 }
 
 .user-msg{

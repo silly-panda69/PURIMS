@@ -42,6 +42,7 @@ const ScopusID = ({email}) => {
                         <p className="gradient-text">PU RIMS</p>
                         <p className="gradient-text" style={{ fontSize: "10px", letterSpacing: "1px" }}>beta</p>
                     </div>
+                    <p style={{marginBottom: "10px"}}>Enter your Scopus ID to proceed</p>
                     <form onSubmit={submitHandler}>
                         <div className='user-field'>
                             <input required type="text" value={scopusID} onChange={(e) => setScopusID(e.target.value)} />
@@ -54,9 +55,9 @@ const ScopusID = ({email}) => {
                     {msg && <div className="user-msg">
                         <p>{msg}</p>
                     </div>}
-                    <div className='user-options'>
-                        <p>Can't remember your code ? </p>
-                        <Link href={'/user/login/'}>Here</Link>
+                    <div  className='user-options'> 
+                        <p >Don't remember your Scopus ID?</p>
+                        <Link target='_blank' href={'https://www.scopus.com/freelookup/form/author.uri'}>Click here to find...</Link>
                     </div>
                 </div>
             </div>

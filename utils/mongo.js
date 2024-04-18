@@ -1550,7 +1550,16 @@ export const univphds = cache(async () => {
       },
     ])
     .toArray();
-  return result.length > 0 ? result[0].phds : 0;
+    // return result.length > 0 ? result[0].phds : 0;
+    if(result?.length>0){
+      if(result[0]?.phds){
+        return result[0].phds;
+      }else{
+        return 0;
+      }
+    }else{
+      return 0;
+    }
 });
 
 //dept LEVEL CARD DATA FOR TOTAL PHDS,RESEARCH FUNDS,
@@ -1581,7 +1590,16 @@ export const deptprojectfund = cache(async (dept) => {
       },
     ])
     .toArray();
-  return result.length > 0 ? result[0].totalFund : 0;
+  // return result.length > 0 ? result[0].totalFund : 0;
+  if(result?.length>0){
+    if(result[0]?.totalFund){
+      return result[0].totalFund;
+    }else{
+      return 0;
+    }
+  }else{
+    return 0;
+  }
 });
 
 //department wise phds
@@ -1615,7 +1633,16 @@ export const deptwisephds = cache(async (dept) => {
 
   const result = await shodhganga.aggregate(aggregationPipeline).toArray();
 
-  return result.length > 0 ? result[0].totalPhds : 0;
+  // return result.length > 0 ? result[0].totalPhds : 0;
+  if(result?.length>0){
+    if(result[0]?.totalPhds){
+      return result[0].totalPhds;
+    }else{
+      return 0;
+    }
+  }else{
+    return 0;
+  }
 });
 
 

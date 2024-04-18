@@ -42,7 +42,6 @@ export default async function Home() {
 	const totalProjectFund= await univprojectfund();
 	const totalPhds=await univphds();
 	const totalProjects=await univprojects();
-	console.log(totalProjects);
 	const { TWEET_COUNT} = await getDepartmentSocialMetrics("pu");
 	let impact = pubChart.reduce(
 		(p, t) => p + (parseInt(t.metrics?.impactFactorData?.metrics?.impactMetrics?.jif) || 0) * t.value,

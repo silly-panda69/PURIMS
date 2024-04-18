@@ -23,11 +23,7 @@ export default function About() {
 						<p style={{display: "inline"}}>collects all research statistics from various reputable sources, and displays it at a single, easy to access platform.</p>
 					</div>
 					<div style={{marginTop: "15px"}}>
-						<p>Developed by,</p>
-						<p>MAIVRIK Lab</p>
-						<p>UIET</p>
-						<p>Panjab University</p>
-						<p>ML, AI, Vision & Robotics Incubation Cum Knowledge Lab</p>
+						<p>Developed at : MAIVRIK Lab, UIET, Block 1, 1st floor, Panjab University</p>
 					</div>
 				</div>
 			</div>
