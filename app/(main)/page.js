@@ -1,4 +1,3 @@
-import api from "@/utils/api";
 import Link from "next/link";
 import Card from "@/components/UI/Card";
 import CrossRefIcon from "@/icons/Crossref";
@@ -9,7 +8,6 @@ import SortIcon from "@/icons/SortIcon";
 import CardContent from "@/components/UI/CardContent";
 import SubjectChart from "@/components/subjectchart";
 import LineChart from "@/components/linechart";
-import CoauthorMap from "@/components/CoauthorMap";
 import Research_icon from "@/icons/Research_icon";
 import Fund_icon from "@/icons/Fund_icon";
 import Phd_icon from "@/icons/Phd_icons";
@@ -30,10 +28,7 @@ import StatCard from "./StatCard";
 import PubTypeChart from "@/components/pubTypeChart";
 import SubTypeChart from "@/components/typechart";
 import Globe3D from "@/components/Globe3D";
-import Header from "@/components/Header/Header";
 import XIcon from "@/icons/X";
-import SocialCard from "@/components/socialCard";
-import { auth } from "../auth";
 
 export default async function Home() {
 	let data = await getDepts();
@@ -48,13 +43,11 @@ export default async function Home() {
 	const totalPhds=await univphds();
 	const totalProjects=await univprojects();
 	console.log(totalProjects);
-	const { TWEET_COUNT, FACEBOOK_COUNT } = await getDepartmentSocialMetrics("pu");
+	const { TWEET_COUNT} = await getDepartmentSocialMetrics("pu");
 	let impact = pubChart.reduce(
 		(p, t) => p + (parseInt(t.metrics?.impactFactorData?.metrics?.impactMetrics?.jif) || 0) * t.value,
 		0
 	);
-	const session=await auth();
-	console.log("session: ",session);
 
 	return (
 		<div id="home-main" className="dark">
