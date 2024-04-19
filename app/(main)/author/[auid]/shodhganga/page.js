@@ -21,6 +21,7 @@ export default async function AuthorShodh({ params = { auid: "" }, searchParams 
 	const ganga = await getShodh({
 		...searchParams,
 		dept: a.dept,
+
 		regexp: `(${a.profile.firstName})|(${a.profile.firstname} ${a.profile.lastName})|(${a.profile.lastName}, ${a.profile.firstName})`,
 	});
 	return (

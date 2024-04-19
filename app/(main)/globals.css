@@ -527,6 +527,8 @@ details.open-card[open] {
 }
 
 .user-options{
+	display: flex;
+	gap: 10px;
 }
 
 .user-options a{

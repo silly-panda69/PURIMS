@@ -56,8 +56,7 @@ const UpdatePage = ({ data, display }) => {
         .then((res) => res.data);
         setMsg(result.message);
       if (result.success) {
-        // router.refresh();
-        // router.push(`/author/${data.scopusID}`);
+        router.push(`/author/${data.scopusID}`);
         setTimeout(()=>{
           window.location.reload();
         },2000);

@@ -55,9 +55,9 @@ const ScopusID = ({email}) => {
                     {msg && <div className="user-msg">
                         <p>{msg}</p>
                     </div>}
-                    <div  className='user-options'> 
+                    <div> 
                         <p >Don't remember your Scopus ID?</p>
-                        <Link target='_blank' href={'https://www.scopus.com/freelookup/form/author.uri'}>Click here to find...</Link>
+                        <Link style={{color: "blue"}} target='_blank' href={'https://www.scopus.com/freelookup/form/author.uri'}>Click here to find...</Link>
                     </div>
                 </div>
             </div>

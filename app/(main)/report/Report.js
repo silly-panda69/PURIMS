@@ -1,9 +1,13 @@
 "use client";
-import TimePicker from '@/components/TimeRange';
 import React, { useState } from 'react';
+import Button from '@/components/UI/Button';
+import Link from 'next/link';
 
 const Report = ({ dept }) => {
     const [authors, setAuthors] = useState([]);
+    const [from,setFrom]=useState("");
+    const [to,setTo]=useState("");
+    const [auid,setAuid]=useState("");
     const addData = async (e) => {
         try {
             if (e.target && e.target.value) {
@@ -40,7 +44,7 @@ const Report = ({ dept }) => {
             </div>
             <div>
                 <h4>Author</h4>
-                <select>
+                <select onChange={(e)=> setAuid(e.target.value)}>
                     <option value={""} default hidden>Author</option>
                     {authors && authors.map((e) => {
                         return <option value={e._id}>
@@ -50,11 +54,18 @@ const Report = ({ dept }) => {
                 </select>
             </div>
             <p>From</p>
-            <input type='month' />
+            <input value={from} onChange={(e)=>setFrom(e.target.value)} type='month' />
             <p>To</p>
-            <input type='month' />
+            <input value={to} onChange={(e)=>setTo(e.target.value)} type='month' />
             <br></br>
-            <button>Generate Report</button>
+            <Button
+				component={Link}
+				href={{ pathname: `${auid}/details`, query: { from, to } }}
+				className="text-xl"
+				variant="filled"
+			>
+				Generate Report
+			</Button>
         </div>
     );
 }

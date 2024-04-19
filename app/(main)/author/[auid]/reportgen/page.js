@@ -14,6 +14,8 @@ import {
 } from "@/utils/mongo";
 import TimePicker from "@/components/TimeRange";
 import alpha3 from "@/utils/alpha3";
+import { auth } from "@/app/auth";
+import { redirect } from "next/navigation";
 
 // const id = "55940987100";
 
@@ -22,6 +24,7 @@ export default async function AuthorView({ params = { auid: "" }, searchParams }
 	if (!auid) {
 		throw "No ID given!";
 	}
+	const session=await auth();
 	const authData = await getAuthor(auid);
 	// const data = await getDocs({
 	// 	authors: auid,
@@ -31,8 +34,8 @@ export default async function AuthorView({ params = { auid: "" }, searchParams }
 	const yearlyChart = await getAuthorYearlyChart(auid, { from: searchParams.from, to: searchParams.to });
 	let years = yearlyChart.map((y) => y.x);
 
-	return (
-		<TimePicker
+	if(session?.scopusID===auid && session?.role==="Author"){
+		return <TimePicker
 			subject={`${authData.profile.lastName}${authData.profile.lastName && ", "}${authData.profile.firstName} ${authData.profile.middleName || ""}`}
 			fromD={searchParams.from}
 			toD={searchParams.to}
@@ -40,5 +43,8 @@ export default async function AuthorView({ params = { auid: "" }, searchParams }
 			max={Math.max(...years)}
 			isAllTime={!(searchParams.from && searchParams.to)}
 		/>
-	);
+	}else{
+		redirect('/');
+	}
+	
 }

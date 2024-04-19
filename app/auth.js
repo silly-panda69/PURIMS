@@ -1,6 +1,7 @@
 import { fetchUser } from "@/utils/mongo";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { redirect } from "next/navigation";
 const bcrypt = require("bcryptjs");
 
 export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
@@ -21,7 +22,7 @@ export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
                     const result=await fetchUser(email);
                     if(result){
                         if(result.verified){
-                            if(result.role==="Author"){
+                            if(result.role && result.role==="Author"){
                                 if(result.scopusID){
                                     const isMatch=await bcrypt.compareSync(password,result.password);
                                     if(isMatch){
@@ -33,7 +34,7 @@ export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
                                 }else{
                                     return null;
                                 }
-                            }else{
+                            }else if(result.role && result.role!=="Author"){
                                 const isMatch=await bcrypt.compareSync(password,result.password);
                                 if(isMatch){
                                     const user={email,password,role: result.role12};
@@ -41,6 +42,8 @@ export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
                                 }else{
                                     return null;
                                 }
+                            }else{
+                                return null;      
                             }
                         }else{
                             return null;

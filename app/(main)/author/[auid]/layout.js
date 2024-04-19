@@ -22,12 +22,6 @@ export default async function AuthorLayout({ children, params = { auid: "" } }) 
 				<ActiveLinkChip slug={"shodhganga"} href={`/author/${auid}/shodhganga`}>
 					Shodhganga
 				</ActiveLinkChip>
-				<ActiveLinkChip slug={"resume"} href={`/author/${auid}/resume`}>
-					Résumé
-				</ActiveLinkChip>
-				<ActiveLinkChip slug={"reportgen"} href={`/author/${auid}/reportgen`}>
-					Reports
-				</ActiveLinkChip>
 				<ActiveLinkChip slug={"projects"} href={`/author/${auid}/projects`}>
 					Projects
 				</ActiveLinkChip>

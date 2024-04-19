@@ -679,7 +679,7 @@ export async function POST(req) {
                 const value1 = await insertAuthors(data1, scopusID);
                 const value2 = await insertDocuments(data2, data1, scopusID);
                 if(value1 && value2){
-                  return NextResponse.json({ msg: "Successfully registered!", success: false });
+                  return NextResponse.json({ msg: "Successfully registered!", success: true });
                 }else{
                   return NextResponse.json({ msg: "Error registering ID", success: false });
                 }

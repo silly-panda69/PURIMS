@@ -14,12 +14,28 @@ const Login = () => {
         e.preventDefault();
         try{
             const result=await signIn("credential",{email,password,redirect: false});
-            console.log(result);
             if(!result.error && result.ok){
                 router.refresh();
                 setMsg("Successfully Logged in");
             }else{
-                setMsg("Invalid Log in");
+                const res=await fetch("/api/user/signin/status",{
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json",
+                    },
+                    body: JSON.stringify({email,password})
+                })
+                const json=await res.json();
+                if(json?.code===102){
+                    console.log('email');
+                    router.push(`/user/signup/verification/${email}`)
+                }else if(json?.code===141){
+                    console.log('scopusid')
+                    router.push(`/user/signup/verification/${email}/scopusID`)
+                }else{
+                    setMsg("Invalid Log in");
+                }
             }
         }
         catch(err){
