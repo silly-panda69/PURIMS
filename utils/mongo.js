@@ -1550,16 +1550,16 @@ export const univphds = cache(async () => {
       },
     ])
     .toArray();
-    // return result.length > 0 ? result[0].phds : 0;
-    if(result?.length>0){
-      if(result[0]?.phds){
-        return result[0].phds;
-      }else{
-        return 0;
-      }
-    }else{
+  // return result.length > 0 ? result[0].phds : 0;
+  if (result?.length > 0) {
+    if (result[0]?.phds) {
+      return result[0].phds;
+    } else {
       return 0;
     }
+  } else {
+    return 0;
+  }
 });
 
 //dept LEVEL CARD DATA FOR TOTAL PHDS,RESEARCH FUNDS,
@@ -1591,13 +1591,13 @@ export const deptprojectfund = cache(async (dept) => {
     ])
     .toArray();
   // return result.length > 0 ? result[0].totalFund : 0;
-  if(result?.length>0){
-    if(result[0]?.totalFund){
+  if (result?.length > 0) {
+    if (result[0]?.totalFund) {
       return result[0].totalFund;
-    }else{
+    } else {
       return 0;
     }
-  }else{
+  } else {
     return 0;
   }
 });
@@ -1634,13 +1634,13 @@ export const deptwisephds = cache(async (dept) => {
   const result = await shodhganga.aggregate(aggregationPipeline).toArray();
 
   // return result.length > 0 ? result[0].totalPhds : 0;
-  if(result?.length>0){
-    if(result[0]?.totalPhds){
+  if (result?.length > 0) {
+    if (result[0]?.totalPhds) {
       return result[0].totalPhds;
-    }else{
+    } else {
       return 0;
     }
-  }else{
+  } else {
     return 0;
   }
 });
@@ -1769,93 +1769,172 @@ export const checkNewUser = async (auid) => {
   }
 }
 
-export const insertDocuments = async (data,response,scopusID) => {
-  try{
-    for(let i=0;i<data.length;i++){
-      console.log('yes')
-      await documents.insertOne({
+export const insertDocuments = async (data, response, scopusID) => {
+  try {
+    for (let i = 0; i < data.length; i++) {
+      console.log(data[i]['dc:identifier'].split("SCOPUS_ID:")[1]);
+      const resx = await fetch(`https://api.elsevier.com/content/abstract/scopus_id/${data[i]['dc:identifier'].split("SCOPUS_ID:")[1]}?apiKey=8fe61eaf1249411824c5ff635b62a9a4&insttoken=84fd8bfde085269f584c12aca59d945a`, {
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
+      });
+      const references=await fetch(`https://api.crossref.org/works/${data[i]["prism:doi"]}`,{
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
+      });
+      let plumx=await fetch(`https://api.elsevier.com/analytics/plumx/doi/${data[i]["prism:doi"]}?apiKey=8fe61eaf1249411824c5ff635b62a9a4&insttoken=84fd8bfde085269f584c12aca59d945a`,{
+        headers: {
+          "Accept": "application/json",
+          "Content-Type": "application/json",
+        },
+      });
+      plumx=await plumx.json();
+      plumx=plumx["count_categories"];
+      let refs=await references.json();
+      let funders=refs["message"]["funder"];
+      let refer=refs["message"]["reference"];
+      let refer1=refer.map((e,i)=>{
+        return {
+          id: i,
+          text: e["unstructured"]?e["unstructured"]:"",
+          scopusID: e["DOI"]?e["DOI"]:"",
+          inDB: false,
+        }
+      });
+      // console.log(refer1);
+      // await reference.insertOne({
+      //   _id: data[i]['dc:identifier'].split("SCOPUS_ID:")[1],
+      //   refCount: refer1.length,
+      //   reference: refer1,
+      //   scopusID: data[i]['dc:identifier'].split("SCOPUS_ID:")[1],
+      //   doi: data[i]["prism:doi"],
+      // });
+      refer1=refer.map((e,i)=>{
+        const text=(e["author"]?e["author"]:"")+(e["year"]?`( ${e["year"]})`:"")+(e["article-title"]?` ${e["article-title"]}`:"")+(e["journal-title"]?` ${e["journal-title"]}`:"")+(e["DOI"]?` DOI: ${e["DOI"]}`:"");
+        return {
+          id: i,
+          text: text,
+          scopusID: e["DOI"]?e["DOI"]:"",
+          inDB: false,
+          doi: e["DOI"]?e["DOI"]:"",
+        }
+      });
+      // console.log(refer1);
+      // let data1= await resx.json();
+      // data1= data1["abstracts-retrieval-response"];
+      // let data2 = data1["authors"]["author"];
+      // data2=data2.map(async(e)=>{
+      //   let author_data=await fetch(`https://api.elsevier.com/content/author/author_id/${e["@auid"]}?apiKey=8fe61eaf1249411824c5ff635b62a9a4&insttoken=84fd8bfde085269f584c12aca59d945a`, {
+      //     headers: {
+      //       "Accept": "application/json",
+      //       "Content-Type": "application/json",
+      //     },
+      //   });
+      //   author_data=await author_data.json(); 
+      //   author_data=author_data["author-retrieval-response"][0]["author-profile"]["affiliation-current"]['affiliation']["ip-doc"];
+      //   return {
+      //     givenName: e["preferred-name"]["ce:given-name"],
+      //     initials: e["preferred-name"]["ce:initials"],
+      //     surname: e["preferred-name"]["ce:surname"],
+      //     indexedName: e["preferred-name"]["ce:indexed-name"],
+      //     auid: e["@auid"],
+      //     seq: e["@seq"],
+      //     affiliation: [
+      //       {
+      //         afID: author_data["@id"],
+      //         dptID: "",
+      //         organization: [
+      //           author_data["@afdispname"]
+      //         ],
+      //         country: author_data["address"]["country"],
+      //         city: author_data["address"]["city"],
+      //       }
+      //     ],
+      //     inDb: false
+      //   }
+      // })
+      let data1= await resx.json();
+      const fundingtxt=data1;
+      data1= data1["abstracts-retrieval-response"];
+      let data23 = data1["authors"]["author"];
+      const data2=data23.map((e)=>{
+        return {
+          givenName: e["preferred-name"]["ce:given-name"],
+          initials: e["preferred-name"]["ce:initials"],
+          surname: e["preferred-name"]["ce:surname"],
+          indexedName: e["preferred-name"]["ce:indexed-name"],
+          auid: e["@auid"],
+          seq: e["@seq"],
+          affiliation: [
+            {
+              afID: e["affiliation"]["@id"],
+              dptID: "",
+              organization: [
+                "University Institute of Engineering and Technology"
+              ],
+              country: "",
+              city: "",
+            }
+          ],
+          inDb: false
+        }
+      })
+      let subject=data1["subject-areas"]["subject-area"];
+      subject=subject.map(e=>{
+        return e["@code"];
+      });
+      
+      const response1=await documents.findOne({scopusID: data[i]['dc:identifier'].split("SCOPUS_ID:")[1]});
+      if(!response1){
+        await documents.insertOne({
           _id: data[i]['dc:identifier'].split("SCOPUS_ID:")[1],
-          scopousId: data[i]['dc:identifier'].split("SCOPUS_ID:")[1],
+          scopusID: data[i]['dc:identifier'].split("SCOPUS_ID:")[1],
           citedByCount: data[i]['cited-by-count'],
           title: data[i]["dc:title"],
-          description: "",
+          description: data1["coredata"]["dc:description"],
           eid: data[i]['eid'],
           doi: data[i]["prism:doi"],
-          subType: data[i]["subtype"],
+          subType: data1["coredata"]["subtypeDescription"],
           source: {
-              aggregationType: "",
-              coverDate: data[i]["prism:coverDate"],
-              issn: [data[i]['prism:issn']],
-              pageRange: data[i]["pageRange"],
-              publicationName: data[i]["prism:publicationName"],
-              volume: data[i]["prism:volume"],
-              subType: data[i]["subtype"],
-              sourceID: data[i]["source-id"],
+            aggregationType: data[i]["prism:aggregationType"],
+            coverDate: data[i]["prism:coverDate"],
+            issn: [data[i]['prism:issn']],
+            pageRange: data[i]["prism:pageRange"],
+            publicationName: data[i]["prism:publicationName"],
+            volume: data[i]["prism:volume"],
+            subType: data1["coredata"]["subtypeDescription"],
+            sourceID: data[i]["source-id"],
           },
-          openAccess: (data[i]["openaccess"]==="0")?"false":"true",
-          subjectAreas: [],
-          hasFundingInfo: false,
-          fundingText: "",
-          authors: [
-              {
-                  givenName: response['author-retrieval-response'][0]["author-profile"]['preferred-name']['given-name'],
-                  initials: response['author-retrieval-response'][0]["author-profile"]['preferred-name']['given-name'],
-                  surname: response['author-retrieval-response'][0]["author-profile"]['preferred-name']['surname'],
-                  indexedName: response['author-retrieval-response'][0]["author-profile"]['preferred-name']['surname'],
-                  auid: scopusID,
-                  seq: 0,
-                  affiliation: [
-                     {
-                      adID: "60018526",
-                      dptID: "103950656",
-                      organization: [
-                          response['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["sort-name"],
-                          "pu"
-                      ],
-                      country: "ind",
-                      city: "Chandigarh",
-                      postalCode: 160014,
-                     }
-                  ],
-                  inDB: false,
-              }
-  
-          ],
-          plum: [
-              {
-                  name: 0,
-                  total: 0,
-                  count_types: [
-  
-                  ]
-              }
-          ],
+          openAccess: (data[i]["openaccess"] === "0") ? false : true,
+          subjectAreas: subject,
+          hasFundingInfo: (fundingtxt["abstracts-retrieval-response"]["item"]["xocs:meta"]["xocs:funding-list"]["xocs:funding-text"]) ? true : false,
+          fundingText: (fundingtxt["abstracts-retrieval-response"]["item"]["xocs:meta"]["xocs:funding-list"]["xocs:funding-text"]) ? fundingtxt["abstracts-retrieval-response"]["item"]["xocs:meta"]["xocs:funding-list"]["xocs:funding-text"] : "",
+          authors: data2,
+          plum: plumx,
           crossref: {
-              citedByCount: 0,
-              funder: [
-                  {
-                      DOI: "",
-                      name: "",
-                      "doi-asserted-by": "",
-                      award: [],
-                  }
-  
-              ]
+            citedByCount: 0,
+            funder: funders,
           },
           departments: [
-              {}
+            {}
           ],
-          coverDate: data[i]["coverDate"],
+          coverDate: new Date(data[i]["prism:coverDate"]),
           correspondence: [],
-          authorCount: 0,
-          refCount: 0,
-          reference: [],
+          authorCount: data2.length,
+          refCount: refer1.length,
+          reference: refer1,
           authorIDs: [
-              scopusID,
+            scopusID,
           ]
-      })
-  }
-  }catch(err){
+        })
+      }else{
+        console.log("already exist")
+      }
+    }
+  } catch (err) {
     console.log(err)
   }
   return true;

@@ -11,13 +11,16 @@ export async function POST(req){
         //check if the user exists
         const user=await checkUser(email);
         if(user===false){
+          const time=new Date();
           const secret=process.env.HASH_SECRET;
+          const custom=time+secret+email;
             authenticator.options={digits: 4};
             hotp.options={digits: 4};
-            const otp=hotp.generate(secret,10);
+            const otp=hotp.generate(custom,10);
             const salt=await bcrypt.genSaltSync(10);
             const token=await bcrypt.hashSync(otp,salt);
             const result=await askToken(email,token);
+            console.log("otp: ",otp);
             if(result){
                   const transporter = nodemailer.createTransport({
                     service: "Gmail",

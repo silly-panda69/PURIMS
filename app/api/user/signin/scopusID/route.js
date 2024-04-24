@@ -673,6 +673,11 @@ export async function POST(req) {
                     "Content-Type": "application/json",
                   },
                 });
+                if(res1 && res2){
+                  console.log('yes');
+                }else{
+                  console.loh('no');
+                }
                 const data1 = await res1.json();
                 let data2 = await res2.json()
                 data2=data2['search-results']['entry'];

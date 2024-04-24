@@ -41,16 +41,16 @@ export default async function Header({ className = "" }) {
 				</Link>}
 				{(session && session.user && session.user.email) && <div className="profile-click">
 					<div className="profile-avatar">
-						{(session.scopusID && session.role === "Author" && author && author.profile.img) && <img src={author.profile.img} className="profile-avatar"></img>}
+						{/* {(session.scopusID && session.role === "Author" && author && author.profile.img) && <img src={author.profile.img} className="profile-avatar"></img>}
 						{(session.scopusID && session.role === "Author" && !author.profile.img) && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>}
-						{!(session.scopusID && (session.role === "Author")) && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>}
+						{!(session.scopusID && (session.role === "Author")) && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>} */}
 						<div className="profile-display">
 							<div className="profile-dropdown">
 								<div className="profile-dropdown-avatar">
 									<div className="profile-avatar">
-										{(session.scopusID && session.role === "Author" && author && author.profile.img) && <img src={author.profile.img} className="profile-avatar"></img>}
+										{/* {(session.scopusID && session.role === "Author" && author && author.profile.img) && <img src={author.profile.img} className="profile-avatar"></img>}
 										{(session.scopusID && session.role === "Author" && !author.profile.img) && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>}
-										{(session.scopusID && (session.role !== "Author")) && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>}
+										{(session.scopusID && (session.role !== "Author")) && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>} */}
 									</div>
 									<div className="profile-name">
 										{(!author && session.role === "Super_Admin") && <p>Admin</p>}

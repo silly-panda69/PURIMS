@@ -19,10 +19,12 @@ export async function POST(req){
                 const hashPassword=await bcrypt.hashSync(password,salt);
                 const user=await insertUser(email,hashPassword);
                 if(user){
-                  const secret=process.env.HASH_SECRET;
+                    const secret=process.env.HASH_SECRET;
                     authenticator.options={digits: 4};
                     hotp.options={digits: 4};
-                    const token=hotp.generate(secret,10);
+                    const time=new Date();
+                    const custom=time+secret+email;
+                    const token=hotp.generate(custom,10);
                     const salt=await bcrypt.genSaltSync(10);
                     const hashOtp=await bcrypt.hashSync(token,salt);
                     const verify=await insertToken(email,hashOtp);
@@ -34,7 +36,7 @@ export async function POST(req){
                           pass: process.env.MAIL_SECRET,
                         },
                       });
-                    const info = await transporter.sendMail({
+                    const info = transporter.sendMail({
                         from: process.env.MAIL_URL,
                         to: email,
                         subject: "Confirm your email address",
