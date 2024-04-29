@@ -120,7 +120,7 @@ export default async function Home() {
 						</Icon>
 					}
 				/>
-				<StatCard
+{/*<StatCard
 					className="col-span-4 self-stretch"
 					stat={impact}
 					statTitle={"Total Impact Factor"}
@@ -129,7 +129,7 @@ export default async function Home() {
 							<SortIcon />
 						</Icon>
 					}
-				/>
+				/>*/}
 				<StatCard
 					className="col-span-4 self-stretch"
 					stat={metrics.fundedCount}
