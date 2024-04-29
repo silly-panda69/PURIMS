@@ -997,167 +997,83 @@ export const getDepartmentSubjectChart = cache(
   }
 );
 
-// export const getDepartmentPubChart = cache(async (dept, { from, to } = {}) => {
-//   let chart = await documents
-//     .aggregate([
-//       {
-//         $match: {
-//           departments: dept,
-//           subjectAreas: {
-//             $exists: true,
-//           },
-//           ...(from &&
-//             to && {
-//               coverDate: {
-//                 $gte: new Date(from),
-//                 $lte: new Date(to),
-//               },
-//             }),
-//         },
-//       },
-//       // {
-//       //   $project: {
-//       //     sourceID: "$source.sourceID",
-//       //     source: "$source.publicationName",
-//       //   },
-//       // },
-//       {
-//         $group: {
-//           _id: {
-//             sourceID: "$source.sourceID",
-//             source: "$source.publicationName",
-//           },
-//           value: {
-//             $sum: 1,
-//           },
-//         },
-//       },
-//       {
-//         $lookup: {
-//           from: "sources",
-//           localField: "_id.sourceID",
-//           foreignField: "_id",
-//           pipeline: [
-//             {
-//               $project: {
-//                 citeScore: "$citeScore",
-//                 snip: "$snip",
-//                 sjr: "$sjr",
-//                 // impactFactorData: "$impactFactorData",
-//               },
-//             },
-//           ],
-//           as: "metrics",
-//         },
-//       },
-//       {
-//         $set: {
-//           metrics: {
-//             $arrayElemAt: ["$metrics", 0],
-//           },
-//         },
-//       },
-//       // {
-//       //   $project: {
-//       //     // id: "$_id.sourceID",
-//       //     // label: "$_id.source",
-//       //     metrics: "$metrics",
-//       //     // value: "$value",
-//       //   },
-//       // },
-//     ])
-//     .toArray();
-   
-
-//   return chart;
-// });
-
 export const getDepartmentPubChart = cache(async (dept, { from, to } = {}) => {
-  const pipeline = [
-    {
-      $match: {
-        departments: dept,
-        subjectAreas: { $exists: true },
-        ...(from &&
-          to && {
-            coverDate: { $gte: new Date(from), $lte: new Date(to) },
-          }),
-      },
-    },
-    {
-      $group: {
-        _id: {
-          sourceID: "$source.sourceID",
-          source: "$source.publicationName",
+  let chart = await documents
+    .aggregate([
+      {
+        $match: {
+          departments: dept,
+          subjectAreas: {
+            $exists: true,
+          },
+          ...(from &&
+            to && {
+              coverDate: {
+                $gte: new Date(from),
+                $lte: new Date(to),
+              },
+            }),
         },
-        value: { $sum: 1 },
       },
-    },
-    // {
-    //   $lookup: {
-    //     from: "sources",
-    //     localField: "_id.sourceID",
-    //     foreignField: "_id",
-    //     as: "sourceInfo"
-    //   }
-    // },
-    // {
-    //   $unwind: "$sourceInfo"
-    // },
-    // {
-    //   $project: {
-    //     id: "$_id.sourceID",
-    //     label: "$_id.source",
-    //     value: "$value",
-    //   },
-    // },
-  ];
-
-  // {
-  //   _id: {
-  //     sourceID: '28564',
-  //     source: 'Journal of Physics and Chemistry of Solids'
-  //   },
-  //   id: '28564',
-  //   label: 'Journal of Physics and Chemistry of Solids',
-  //   metrics: {
-  //     _id: '28564',
-  //     citeScore: [Object],
-  //     snip: [Object],
-  //     sjr: [Object]
-  //   },
-  //   value: 2
-  // },
-
-  // console.log("Pipeline:", JSON.stringify(pipeline));
-
-  const chart = await documents.aggregate(pipeline).toArray();
-
-  // console.log("Chart:", chart);
+      // {
+      //   $project: {
+      //     sourceID: "$source.sourceID",
+      //     source: "$source.publicationName",
+      //   },
+      // },
+      {
+        $group: {
+          _id: {
+            sourceID: "$source.sourceID",
+            source: "$source.publicationName",
+          },
+          value: {
+            $sum: 1,
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "sources",
+          localField: "_id.sourceID",
+          foreignField: "_id",
+          pipeline: [
+            {
+              $project: {
+                citeScore: "$citeScore",
+                snip: "$snip",
+                sjr: "$sjr",
+                // impactFactorData: "$impactFactorData",
+              },
+            },
+          ],
+          as: "metrics",
+        },
+      },
+      {
+        $set: {
+          metrics: {
+            $arrayElemAt: ["$metrics", 0],
+          },
+        },
+      },
+      // {
+      //   $project: {
+      //     // id: "$_id.sourceID",
+      //     // label: "$_id.source",
+      //     metrics: "$metrics",
+      //     // value: "$value",
+      //   },
+      // },
+    ])
+    .toArray();
+   
 
   return chart;
 });
-export const getDepartmentPubChartdata = cache(async (id) => {
-  const pipeline = [
-    {
-      $match: {
-        _id: id,
-      },
-    },
-    {
-      $project: {
-          metrics:{
-            _id: "$_id",
-          citeScore: "$citeScore",
-          snip: "$snip",
-          sjr: "$sjr",
-          // impactFactorData: "$impactFactorData",
-          }
-      },
-    }
-  ];
-  return await sources.aggregate(pipeline).toArray();
-});
+
+
+
  
 export const getDepartmentWorldChart = cache(
   async (dept, { from, to } = {}) => {
