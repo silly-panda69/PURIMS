@@ -23,7 +23,7 @@ import {
 	univphds,
 	univprojects,
 	univprojectfund,
-	getDepartmentPubChartdata
+	// getDepartmentPubChartdata
 } from "@/utils/mongo";
 import StatCard from "./StatCard";
 import PubTypeChart from "@/components/pubTypeChart";
@@ -38,32 +38,20 @@ export default async function Home() {
 	const yearlyChart = await getDepartmentYearlyChart("pu");
 	const  pubChartData = await getDepartmentPubChart("pu");
 
-  //  const pubChart = await Promise.all(
-  //   pubChartData?.map(async (item) => {
-  //     return {
-  //       _id: item._id,
-  //       id: item._id.sourceID,
-  //       label: item._id.source,
-
-  //       metrics: item.metrics,
-  //       value: item.value,
-  //     };
-  //   })
-  // );
-
-  const pubChart = 
+   const pubChart = await Promise.all(
     pubChartData?.map(async (item) => {
-      const metrics=await getDepartmentPubChartdata(item._id.sourceID)
       return {
         _id: item._id,
         id: item._id.sourceID,
         label: item._id.source,
 
-        // metrics: item.metrics,
-        metrics:metrics,
+        metrics: item.metrics,
         value: item.value,
       };
     })
+  );
+
+
 
 
 
