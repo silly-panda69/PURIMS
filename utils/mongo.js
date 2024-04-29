@@ -1008,24 +1008,24 @@ export const getDepartmentPubChart = cache(async (dept, { from, to } = {}) => {
           },
           ...(from &&
             to && {
-            coverDate: {
-              $gte: new Date(from),
-              $lte: new Date(to),
-            },
-          }),
+              coverDate: {
+                $gte: new Date(from),
+                $lte: new Date(to),
+              },
+            }),
         },
       },
-      {
-        $project: {
-          sourceID: "$source.sourceID",
-          source: "$source.publicationName",
-        },
-      },
+      // {
+      //   $project: {
+      //     sourceID: "$source.sourceID",
+      //     source: "$source.publicationName",
+      //   },
+      // },
       {
         $group: {
           _id: {
-            sourceID: "$sourceID",
-            source: "$source",
+            sourceID: "$source.sourceID",
+            source: "$source.publicationName",
           },
           value: {
             $sum: 1,
@@ -1057,16 +1057,17 @@ export const getDepartmentPubChart = cache(async (dept, { from, to } = {}) => {
           },
         },
       },
-      {
-        $project: {
-          id: "$_id.sourceID",
-          label: "$_id.source",
-          metrics: "$metrics",
-          value: "$value",
-        },
-      },
+      // {
+      //   $project: {
+      //     // id: "$_id.sourceID",
+      //     // label: "$_id.source",
+      //     metrics: "$metrics",
+      //     // value: "$value",
+      //   },
+      // },
     ])
     .toArray();
+   
 
   return chart;
 });
