@@ -1043,7 +1043,7 @@ export const getDepartmentPubChart = cache(async (dept, { from, to } = {}) => {
                 citeScore: "$citeScore",
                 snip: "$snip",
                 sjr: "$sjr",
-                impactFactorData: "$impactFactorData",
+                // impactFactorData: "$impactFactorData",
               },
             },
           ],
