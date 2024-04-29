@@ -38,7 +38,7 @@ export default async function Home() {
 	const  pubChartData = await getDepartmentPubChart("pu");
 
    const pubChart = await Promise.all(
-    pubChartData.map(async (item) => {
+    pubChartData?.map(async (item) => {
       return {
         _id: item._id,
         id: item._id.sourceID,
@@ -243,12 +243,12 @@ export default async function Home() {
 						<span className="highlighted-text">Science</span>.
 					</div>
 				</div>
-{/*<PubTypeChart                  
+                             {pubChart && <PubTypeChart                  
 					baseURL={`/document`}
 					data={pubChart}
 					classType="col-span-4 fade-side-right"
 					classChart="col-span-8 fade-side-left bg-transparent"
-				/>*/}
+				/>}
 				<SubTypeChart
 					baseURL={`/document`}
 					data={subtypeChart}
