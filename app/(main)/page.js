@@ -43,10 +43,10 @@ export default async function Home() {
 	const totalPhds=await univphds();
 	const totalProjects=await univprojects();
 	const { TWEET_COUNT} = await getDepartmentSocialMetrics("pu");
-	{/* let impact = pubChart.reduce(
+	{ let impact = pubChart.reduce(
 		(p, t) => p + (parseInt(t.metrics?.impactFactorData?.metrics?.impactMetrics?.jif) || 0) * t.value,
 		0
-	);*/}
+	);
 
 	return (
 		<div id="home-main" className="dark">
@@ -120,7 +120,7 @@ export default async function Home() {
 						</Icon>
 					}
 				/>
-{/*<StatCard
+					<StatCard
 					className="col-span-4 self-stretch"
 					stat={impact}
 					statTitle={"Total Impact Factor"}
@@ -129,7 +129,7 @@ export default async function Home() {
 							<SortIcon />
 						</Icon>
 					}
-				/>*/}
+				/>
 				<StatCard
 					className="col-span-4 self-stretch"
 					stat={metrics.fundedCount}
@@ -225,12 +225,12 @@ export default async function Home() {
 						<span className="highlighted-text">Science</span>.
 					</div>
 				</div>
-{/*<PubTypeChart                  
+					<PubTypeChart                  
 					baseURL={`/document`}
 					data={pubChart}
 					classType="col-span-4 fade-side-right"
 					classChart="col-span-8 fade-side-left bg-transparent"
-				/>*/}
+				/>
 				<SubTypeChart
 					baseURL={`/document`}
 					data={subtypeChart}
