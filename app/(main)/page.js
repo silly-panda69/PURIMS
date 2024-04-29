@@ -22,7 +22,8 @@ import {
 	getMetrics,
 	univphds,
 	univprojects,
-	univprojectfund
+	univprojectfund,
+	getDepartmentPubChartdata
 } from "@/utils/mongo";
 import StatCard from "./StatCard";
 import PubTypeChart from "@/components/pubTypeChart";
@@ -37,19 +38,33 @@ export default async function Home() {
 	const yearlyChart = await getDepartmentYearlyChart("pu");
 	const  pubChartData = await getDepartmentPubChart("pu");
 
-   const pubChart = await Promise.all(
+  //  const pubChart = await Promise.all(
+  //   pubChartData?.map(async (item) => {
+  //     return {
+  //       _id: item._id,
+  //       id: item._id.sourceID,
+  //       label: item._id.source,
+
+  //       metrics: item.metrics,
+  //       value: item.value,
+  //     };
+  //   })
+  // );
+
+  const pubChart = await Promise.all(
     pubChartData?.map(async (item) => {
+      const metrics=await getDepartmentPubChartdata(item._id.sourceID)
       return {
         _id: item._id,
         id: item._id.sourceID,
         label: item._id.source,
 
-        metrics: item.metrics,
+        // metrics: item.metrics,
+        metrics:metrics,
         value: item.value,
       };
     })
   );
-
 
 
 	
@@ -243,12 +258,12 @@ export default async function Home() {
 						<span className="highlighted-text">Science</span>.
 					</div>
 				</div>
-                             {pubChart && <PubTypeChart                  
+{/*  {pubChart && <PubTypeChart                  
 					baseURL={`/document`}
 					data={pubChart}
 					classType="col-span-4 fade-side-right"
 					classChart="col-span-8 fade-side-left bg-transparent"
-				/>}
+				/>}*/}
 				<SubTypeChart
 					baseURL={`/document`}
 					data={subtypeChart}
