@@ -51,7 +51,7 @@ export default async function Home() {
   //   })
   // );
 
-  const pubChart = await Promise.all(
+  const pubChart = 
     pubChartData?.map(async (item) => {
       const metrics=await getDepartmentPubChartdata(item._id.sourceID)
       return {
@@ -64,7 +64,7 @@ export default async function Home() {
         value: item.value,
       };
     })
-  );
+
 
 
 	
