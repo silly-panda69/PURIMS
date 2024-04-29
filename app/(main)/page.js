@@ -46,7 +46,7 @@ export default async function Home() {
 	{ let impact = pubChart.reduce(
 		(p, t) => p + (parseInt(t.metrics?.impactFactorData?.metrics?.impactMetrics?.jif) || 0) * t.value,
 		0
-	);
+	)};
 
 	return (
 		<div id="home-main" className="dark">
