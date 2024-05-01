@@ -679,10 +679,28 @@ export async function POST(req) {
                   console.loh('no');
                 }
                 const data1 = await res1.json();
-                let data2 = await res2.json()
+                let data2 = await res2.json();
+                let all_docs = [];
+                //iterations based on the number of total docs and the 25 page results
+                let doc_iter = Number(data2['search-results']["opensearch:totalResults"]);
+                doc_iter = doc_iter / 25;
+                for (let i = 0; i < doc_iter; i++) {
+                    let doc_burst = await fetch(`https://api.elsevier.com/content/search/scopus?sort=${0}&query=au-id(${scopusID})&start=${25 * i}&count=${25}&apiKey=${process.env.SCOPUS_KEY}`, {
+                        headers: {
+                            "Accept": "application/json",
+                            "Content-Type": "application/json",
+                        },
+                    });
+                    doc_burst = await doc_burst.json();
+                    doc_burst = doc_burst["search-results"]["entry"];
+                    const temp = all_docs.concat(doc_burst);
+                    all_docs = temp;
+                }
+                console.log("author",data1);
+                console.log("docs",data2);
                 data2=data2['search-results']['entry'];
                 const value1 = await insertAuthors(data1, scopusID);
-                const value2 = await insertDocuments(data2, data1, scopusID);
+                const value2 = await insertDocuments(all_docs, data1, scopusID);
                 if(value1 && value2){
                   return NextResponse.json({ msg: "Successfully registered!", success: true });
                 }else{
