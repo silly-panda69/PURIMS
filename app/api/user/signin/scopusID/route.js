@@ -344,7 +344,7 @@ export async function POST(req) {
               }
             } else {
                 const user = await insertScopusID(email, scopusID);
-                const res1 = await fetch(`https://api.elsevier.com/content/author/author_id/${scopusID}?apiKey=8fe61eaf1249411824c5ff635b62a9a4&insttoken=84fd8bfde085269f584c12aca59d945a`, {
+                const res1 = await fetch(`https://api.elsevier.com/content/author/author_id/${scopusID}?apiKey=${process.env.SCOPUS_KEY}`, {
                   headers: {
                     "Accept": "application/json",
                     "Content-Type": "application/json",
@@ -667,7 +667,7 @@ export async function POST(req) {
                                     
                 //                     </html>`
                 // });
-                const res2 = await fetch(`https://api.elsevier.com/content/search/scopus?query=au-id(${scopusID})&apiKey=8fe61eaf1249411824c5ff635b62a9a4&insttoken=84fd8bfde085269f584c12aca59d945a`, {
+                const res2 = await fetch(`https://api.elsevier.com/content/search/scopus?query=au-id(${scopusID})&apiKey=${process.env.SCOPUS_KEY}`, {
                   headers: {
                     "Accept": "application/json",
                     "Content-Type": "application/json",

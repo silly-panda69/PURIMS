@@ -101,7 +101,7 @@ export const getShodh = cache(
     page = 1,
     pageSize = 25,
   } = {}) => {
-    console.log("dept is wds sds  ", dept)
+
     let skip = (page - 1) * pageSize;
     let query = {
       ...(dept && { dept: { $in: dept.split(",") } }),
@@ -126,7 +126,76 @@ export const getShodh = cache(
 );
 
 
+export const getShodhAuthor = cache(
+  async ({
+    dept = null,
+    sort = "dc:date:awarded",
+    order = "descending",
+    s = null, // Change parameter name to 's'
+    page = 1,
+    pageSize = 25,
+    firstName = "",
+    lastName = "",
+  } = {}) => {
+    let skip = (page - 1) * pageSize;
+    let query = {
+      ...(dept && { dept: { $in: dept.split(",") } }),
+      ...(s && {
+        $text: {
+          $search: s,
+        },
+      }),
+    };
 
+    if (s == null && dept == null) query = {};
+
+    if (firstName || lastName) {
+      query = {
+        ...query,
+        $and: [
+          {
+            "dc:contributor:guide": {
+              $regex: lastName
+                ? new RegExp(
+                  `${firstName} ${lastName}|${lastName} ${firstName}|${firstName}, ${lastName}|${lastName}, ${firstName}`,
+                  "i"
+                )
+                : new RegExp(`${firstName}`, "i"),
+            },
+          },
+        ],
+      };
+    }
+
+    let pipeline = [
+      {
+        $addFields: {
+          "dc:contributor:guide": {
+            $replaceAll: {
+              input: "$dc:contributor:guide",
+              find: ".",
+              replacement: "",
+            },
+          },
+        },
+      },
+      {
+        $match: query,
+      },
+    ];
+
+    let results = await shodhganga
+      .aggregate(pipeline)
+      .sort({ [sort]: order === "descending" ? -1 : 1 })
+      .skip(skip)
+      .limit(pageSize)
+      .toArray();
+
+    let count = await shodhganga.countDocuments(query);
+
+    return { count, results };
+  }
+);
 
 
 export const getProjects = cache(
@@ -1008,24 +1077,24 @@ export const getDepartmentPubChart = cache(async (dept, { from, to } = {}) => {
           },
           ...(from &&
             to && {
-              coverDate: {
-                $gte: new Date(from),
-                $lte: new Date(to),
-              },
-            }),
+            coverDate: {
+              $gte: new Date(from),
+              $lte: new Date(to),
+            },
+          }),
         },
       },
-      // {
-      //   $project: {
-      //     sourceID: "$source.sourceID",
-      //     source: "$source.publicationName",
-      //   },
-      // },
+      {
+        $project: {
+          sourceID: "$source.sourceID",
+          source: "$source.publicationName",
+        },
+      },
       {
         $group: {
           _id: {
-            sourceID: "$source.sourceID",
-            source: "$source.publicationName",
+            sourceID: "$sourceID",
+            source: "$source",
           },
           value: {
             $sum: 1,
@@ -1043,7 +1112,7 @@ export const getDepartmentPubChart = cache(async (dept, { from, to } = {}) => {
                 citeScore: "$citeScore",
                 snip: "$snip",
                 sjr: "$sjr",
-                // impactFactorData: "$impactFactorData",
+                impactFactorData: "$impactFactorData",
               },
             },
           ],
@@ -1057,24 +1126,20 @@ export const getDepartmentPubChart = cache(async (dept, { from, to } = {}) => {
           },
         },
       },
-      // {
-      //   $project: {
-      //     // id: "$_id.sourceID",
-      //     // label: "$_id.source",
-      //     metrics: "$metrics",
-      //     // value: "$value",
-      //   },
-      // },
+      {
+        $project: {
+          id: "$_id.sourceID",
+          label: "$_id.source",
+          metrics: "$metrics",
+          value: "$value",
+        },
+      },
     ])
     .toArray();
-   
 
   return chart;
 });
 
-
-
- 
 export const getDepartmentWorldChart = cache(
   async (dept, { from, to } = {}) => {
     let chart = await documents
@@ -1775,128 +1840,186 @@ export const checkNewUser = async (auid) => {
 
 export const insertDocuments = async (data, response, scopusID) => {
   try {
+    console.time();
+    let co_auth = [];
+    const scopus_key=process.env.SCOPUS_KEY;
     for (let i = 0; i < data.length; i++) {
+      console.log(i + 1);
       console.log(data[i]['dc:identifier'].split("SCOPUS_ID:")[1]);
-      const resx = await fetch(`https://api.elsevier.com/content/abstract/scopus_id/${data[i]['dc:identifier'].split("SCOPUS_ID:")[1]}?apiKey=8fe61eaf1249411824c5ff635b62a9a4&insttoken=84fd8bfde085269f584c12aca59d945a`, {
+      const resx = await fetch(`https://api.elsevier.com/content/abstract/scopus_id/${data[i]['dc:identifier'].split("SCOPUS_ID:")[1]}?apiKey=${scopus_key}`, {
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/json",
         },
       });
-      const references=await fetch(`https://api.crossref.org/works/${data[i]["prism:doi"]}`,{
+      const references = await fetch(`https://api.crossref.org/works/${data[i]["prism:doi"]}`, {
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/json",
         },
       });
-      let plumx=await fetch(`https://api.elsevier.com/analytics/plumx/doi/${data[i]["prism:doi"]}?apiKey=8fe61eaf1249411824c5ff635b62a9a4&insttoken=84fd8bfde085269f584c12aca59d945a`,{
+      let plumx = await fetch(`https://api.elsevier.com/analytics/plumx/doi/${data[i]["prism:doi"]}?apiKey=${scopus_key}`, {
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/json",
         },
       });
-      plumx=await plumx.json();
-      plumx=plumx["count_categories"];
-      let refs=await references.json();
-      let funders=refs["message"]["funder"];
-      let refer=refs["message"]["reference"];
-      let refer1=refer.map((e,i)=>{
-        return {
-          id: i,
-          text: e["unstructured"]?e["unstructured"]:"",
-          scopusID: e["DOI"]?e["DOI"]:"",
-          inDB: false,
+      console.log("plum");
+      if (plumx.status === 200) {
+        plumx = await plumx.json();
+        plumx = plumx["count_categories"];
+      } else {
+        plumx = [];
+      }
+      if (resx.status === 200) {
+        console.log('yes');
+      }
+      else {
+        console.log('no');
+      }
+      let refer1=[];
+      let funders="";
+      let refs="";
+      if (references.status === 200) {
+        refs = await references.json();
+        funders = refs["message"]["funder"];
+        let refer = refs["message"]["reference"];
+        let refer_temp = [];
+        if (refer) {
+          for (let i = 0; i < refer.length; i++) {
+            const text = (refer[i]["author"] ? refer[i]["author"] : "") + (refer[i]["year"] ? `( ${refer[i]["year"]})` : "") + (refer[i]["article-title"] ? ` ${refer[i]["article-title"]}` : "") + (refer[i]["journal-title"] ? ` ${refer[i]["journal-title"]}` : "") + (refer[i]["DOI"] ? ` DOI: ${refer[i]["DOI"]}` : "");
+            refer_temp.push({
+              id: i,
+              text: text,
+              scopusID: refer[i]["DOI"] ? refer[i]["DOI"] : "",
+              inDB: false,
+            })
+          }
         }
-      });
-      // console.log(refer1);
-      // await reference.insertOne({
-      //   _id: data[i]['dc:identifier'].split("SCOPUS_ID:")[1],
-      //   refCount: refer1.length,
-      //   reference: refer1,
-      //   scopusID: data[i]['dc:identifier'].split("SCOPUS_ID:")[1],
-      //   doi: data[i]["prism:doi"],
-      // });
-      refer1=refer.map((e,i)=>{
-        const text=(e["author"]?e["author"]:"")+(e["year"]?`( ${e["year"]})`:"")+(e["article-title"]?` ${e["article-title"]}`:"")+(e["journal-title"]?` ${e["journal-title"]}`:"")+(e["DOI"]?` DOI: ${e["DOI"]}`:"");
-        return {
-          id: i,
-          text: text,
-          scopusID: e["DOI"]?e["DOI"]:"",
-          inDB: false,
-          doi: e["DOI"]?e["DOI"]:"",
+        refer1 = refer_temp;
+        const checkref = await reference.findOne({ _id: data[i]['dc:identifier'].split("SCOPUS_ID:")[1] });
+        if (!checkref) {
+          await reference.insertOne({
+            _id: data[i]['dc:identifier'].split("SCOPUS_ID:")[1],
+            refCount: refer1.length,
+            reference: refer1,
+            scopusID: data[i]['dc:identifier'].split("SCOPUS_ID:")[1],
+            doi: data[i]["prism:doi"],
+          });
         }
-      });
-      // console.log(refer1);
-      // let data1= await resx.json();
-      // data1= data1["abstracts-retrieval-response"];
-      // let data2 = data1["authors"]["author"];
-      // data2=data2.map(async(e)=>{
-      //   let author_data=await fetch(`https://api.elsevier.com/content/author/author_id/${e["@auid"]}?apiKey=8fe61eaf1249411824c5ff635b62a9a4&insttoken=84fd8bfde085269f584c12aca59d945a`, {
-      //     headers: {
-      //       "Accept": "application/json",
-      //       "Content-Type": "application/json",
-      //     },
-      //   });
-      //   author_data=await author_data.json(); 
-      //   author_data=author_data["author-retrieval-response"][0]["author-profile"]["affiliation-current"]['affiliation']["ip-doc"];
-      //   return {
-      //     givenName: e["preferred-name"]["ce:given-name"],
-      //     initials: e["preferred-name"]["ce:initials"],
-      //     surname: e["preferred-name"]["ce:surname"],
-      //     indexedName: e["preferred-name"]["ce:indexed-name"],
-      //     auid: e["@auid"],
-      //     seq: e["@seq"],
-      //     affiliation: [
-      //       {
-      //         afID: author_data["@id"],
-      //         dptID: "",
-      //         organization: [
-      //           author_data["@afdispname"]
-      //         ],
-      //         country: author_data["address"]["country"],
-      //         city: author_data["address"]["city"],
-      //       }
-      //     ],
-      //     inDb: false
-      //   }
-      // })
-      let data1= await resx.json();
-      const fundingtxt=data1;
-      data1= data1["abstracts-retrieval-response"];
+        refer_temp = [];
+        if (refer) {
+          for (let i = 0; i < refer.length; i++) {
+            const text = (refer[i]["author"] ? refer[i]["author"] : "") + (refer[i]["year"] ? `( ${refer[i]["year"]})` : "") + (refer[i]["article-title"] ? ` ${refer[i]["article-title"]}` : "") + (refer[i]["journal-title"] ? ` ${refer[i]["journal-title"]}` : "") + (refer[i]["DOI"] ? ` DOI: ${refer[i]["DOI"]}` : "");
+            refer_temp.push({
+              id: i,
+              text: text,
+              scopusID: refer[i]["DOI"] ? refer[i]["DOI"] : "",
+              inDB: false,
+              doi: refer[i]["DOI"] ? refer[i]["DOI"] : "",
+            })
+          }
+        }
+        refer1 = refer_temp;
+      } else {
+        console.log('no');
+      }
+
+      let data1 = await resx.json();
+      const fundingtxt = data1;
+      data1 = data1["abstracts-retrieval-response"];
       let data23 = data1["authors"]["author"];
-      const data2=data23.map((e)=>{
-        return {
-          givenName: e["preferred-name"]["ce:given-name"],
-          initials: e["preferred-name"]["ce:initials"],
-          surname: e["preferred-name"]["ce:surname"],
-          indexedName: e["preferred-name"]["ce:indexed-name"],
-          auid: e["@auid"],
-          seq: e["@seq"],
-          affiliation: [
-            {
-              afID: e["affiliation"]["@id"],
-              dptID: "",
-              organization: [
-                "University Institute of Engineering and Technology"
-              ],
-              country: "",
-              city: "",
+      let data2 = [];
+      for (let i = 0; i < data23.length; i++) {
+        let author_data = await fetch(`https://api.elsevier.com/content/author/author_id/${data23[i]["@auid"]}?apiKey=${scopus_key}`, {
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+          },
+        });
+        if (author_data.status === 200) {
+          author_data = await author_data.json();
+          let affdata = "";
+          if (author_data['author-retrieval-response'][0]["author-profile"]["affiliation-history"]["affiliation"]) {
+            let newaff = [];
+            affdata = author_data['author-retrieval-response'][0]["author-profile"]["affiliation-history"]["affiliation"]
+            for (let i = 0; i < affdata.length; i++) {
+              newaff.push(affdata[i]["ip-doc"]["sort-name"]);
             }
-          ],
-          inDb: false
+            affdata = newaff;
+          }
+          let afid = false;
+          if (data23[i]["affiliation"]) {
+            if (data23[i]["affiliation"]["@id"]) {
+              afid = true;
+            }
+          }
+          const checkAuth = await authors.findOne({ scopusID: data23[i]["@auid"] });
+          let dpD = "";
+          if (author_data['author-retrieval-response'][0]["author-profile"]["affiliation-history"]["affiliation"][0]) {
+            if (author_data['author-retrieval-response'][0]["author-profile"]["affiliation-history"]["affiliation"][0]["@affiliation-id"]) {
+              // console.log(author_data['author-retrieval-response'][0]["author-profile"]["affiliation-history"]["affiliation"][0]["@affiliation-id"])
+              dpD = author_data['author-retrieval-response'][0]["author-profile"]["affiliation-history"]["affiliation"][0]["@affiliation-id"]["@affiliation-id"]
+            }
+          }
+          let address = { country: "", city: "", postal: "" };
+          if (author_data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]) {
+            if (author_data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["address"]) {
+              let temp_add = author_data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["address"];
+              if (temp_add["@country"]) {
+                address["country"] = temp_add["@country"];
+              }
+              if (temp_add["city"]) {
+                address["city"] = temp_add["city"];
+              }
+              if (temp_add["postal-code"]) {
+                address["postal"] = temp_add["postal-code"];
+              }
+            }
+          }
+          data2.push({
+            givenName: data23[i]["preferred-name"]["ce:given-name"],
+            initials: data23[i]["preferred-name"]["ce:initials"],
+            surname: data23[i]["preferred-name"]["ce:surname"],
+            indexedName: data23[i]["preferred-name"]["ce:indexed-name"],
+            auid: data23[i]["@auid"],
+            seq: data23[i]["@seq"],
+            affiliation: [
+              {
+                afID: afid ? data23[i]["affiliation"]["@id"] : "",
+                dptID: dpD,
+                organization: affdata,
+                country: address["country"],
+                city: address["city"],
+                postalCode: address["postal"],
+              }
+            ],
+            inDb: checkAuth ? true : false
+          })
         }
-      })
-      let subject=data1["subject-areas"]["subject-area"];
-      subject=subject.map(e=>{
-        return e["@code"];
-      });
-      
-      const response1=await documents.findOne({scopusID: data[i]['dc:identifier'].split("SCOPUS_ID:")[1]});
-      if(!response1){
+      }
+      const new_co_auth = co_auth.concat(data2);
+      co_auth = new_co_auth;
+      let subject = data1["subject-areas"]["subject-area"];
+      let temp_sub = [];
+      for (let i = 0; i < subject.length; i++) {
+        temp_sub.push(subject[i]["@code"]);
+      }
+      subject = temp_sub;
+      const response1 = await documents.findOne({ _id: data[i]['dc:identifier'].split("SCOPUS_ID:")[1] });
+      if (!response1?._id) {
+        let funding_text = false;
+        if (fundingtxt["abstracts-retrieval-response"]["item"]) {
+          if (fundingtxt["abstracts-retrieval-response"]["item"]["xocs:meta"]) {
+            if (fundingtxt["abstracts-retrieval-response"]["item"]["xocs:meta"]["xocs:funding-list"]["xocs:funding-text"]) {
+              funding_text = true;
+            }
+          }
+        }
         await documents.insertOne({
           _id: data[i]['dc:identifier'].split("SCOPUS_ID:")[1],
           scopusID: data[i]['dc:identifier'].split("SCOPUS_ID:")[1],
-          citedByCount: data[i]['cited-by-count'],
+          citedByCount: Number(data[i]['citedby-count']),
           title: data[i]["dc:title"],
           description: data1["coredata"]["dc:description"],
           eid: data[i]['eid'],
@@ -1914,13 +2037,13 @@ export const insertDocuments = async (data, response, scopusID) => {
           },
           openAccess: (data[i]["openaccess"] === "0") ? false : true,
           subjectAreas: subject,
-          hasFundingInfo: (fundingtxt["abstracts-retrieval-response"]["item"]["xocs:meta"]["xocs:funding-list"]["xocs:funding-text"]) ? true : false,
-          fundingText: (fundingtxt["abstracts-retrieval-response"]["item"]["xocs:meta"]["xocs:funding-list"]["xocs:funding-text"]) ? fundingtxt["abstracts-retrieval-response"]["item"]["xocs:meta"]["xocs:funding-list"]["xocs:funding-text"] : "",
+          hasFundingInfo: (funding_text) ? true : false,
+          fundingText: (funding_text) ? fundingtxt["abstracts-retrieval-response"]["item"]["xocs:meta"]["xocs:funding-list"]["xocs:funding-text"] : "",
           authors: data2,
-          plum: plumx,
+          plum: plumx ? plumx : "",
           crossref: {
-            citedByCount: 0,
-            funder: funders,
+            citedByCount: refs?refs["message"]["is-referenced-by-count"]:0,
+            funder: funders?funders:[],
           },
           departments: [
             {}
@@ -1934,17 +2057,37 @@ export const insertDocuments = async (data, response, scopusID) => {
             scopusID,
           ]
         })
-      }else{
+      } else {
         console.log("already exist")
       }
     }
+    console.timeEnd();
   } catch (err) {
     console.log(err)
   }
   return true;
 }
 
-export const insertAuthors = async (data, scopusID) => {
+export const insertAuthors = async (data, scopusID, email) => {
+  console.log(data,scopusID,email);
+  let afid = "";
+  console.log(data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]);
+  console.log(data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]["$"])
+  if (data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]) {
+    if (data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]["$"]) {
+      afid = data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]["$"];
+    }
+  }
+  if (afid === "") {
+    if (data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["preferred-name"]) {
+      if (data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["preferred-name"]["$"]) {
+        afid = data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["preferred-name"]["$"];
+      }
+    }
+  }
+  const name=data['author-retrieval-response'][0]["author-profile"]['preferred-name']['given-name']+" "+data['author-retrieval-response'][0]["author-profile"]['preferred-name']['surname'];
+  console.log(name);
+  const llm="";
   const result = await authors.insertOne({
     _id: scopusID,
     scopusID: scopusID,
@@ -1955,9 +2098,9 @@ export const insertAuthors = async (data, scopusID) => {
       middleName: "",
       lastName: data['author-retrieval-response'][0]["author-profile"]['preferred-name']['surname'],
       mobile: "",
-      email: "sky6alan",
+      email: email,
     },
-    dept: data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["sort-name"],
+    dept: afid,
     coauthors: [
 
     ],
@@ -1984,7 +2127,7 @@ export const insertAuthors = async (data, scopusID) => {
     },
     crossrefCitations: 0,
     fundedCount: 0,
-    llm: ""
+    llm: llm
   });
   if (result) {
     return true;
