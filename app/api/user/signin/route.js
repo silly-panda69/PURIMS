@@ -305,6 +305,7 @@ export async function POST(req){
                         
                         </html>`, 
                       });
+                      console.log(info);
                     return NextResponse.json({msg: "Registered successfully!",success: true});
                 }else{
                     return NextResponse.json({msg: "Error signing up!",success: false});
