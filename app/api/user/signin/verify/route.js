@@ -11,9 +11,9 @@ export async function POST(req){
         //check if the user exists
         const user=await checkUser(email);
         if(user===false){
-          const time=new Date();
-          const secret=process.env.HASH_SECRET;
-          const custom=time+secret+email;
+            const time=new Date();
+            const secret=process.env.HASH_SECRET;
+            const custom=time+secret+email;
             authenticator.options={digits: 4};
             hotp.options={digits: 4};
             const otp=hotp.generate(custom,10);

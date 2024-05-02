@@ -7,8 +7,10 @@ const ScopusID = ({email}) => {
     const [scopusID, setScopusID] = useState("");
     const [msg, setMsg] = useState("");
     const router=useRouter();
+    const [loading,setLoading]=useState(false);
     const submitHandler = async (e) => {
         e.preventDefault();
+        setLoading(true);
         try {
             const changedEmail = email.replace("%40", "@");
             const response = await fetch("/api/user/signin/scopusID", {
@@ -30,6 +32,7 @@ const ScopusID = ({email}) => {
         catch (err) {
             setMsg("Error Registering...");
         }
+        setLoading(false);
         setTimeout(() => {
             setMsg("");
         }, 3000);
@@ -48,9 +51,12 @@ const ScopusID = ({email}) => {
                             <input required type="text" value={scopusID} onChange={(e) => setScopusID(e.target.value)} />
                             <label>Scopus ID</label>
                         </div>
-                        <div className='user-button mt-5'>
+                        {!loading && <div className='user-button mt-5'>
                             <button type='submit'>Submit</button>
-                        </div>
+                        </div>}
+                        {loading && <div className='user-button mt-5'>
+                            <button disabled>Submitting...</button>
+                        </div>}
                     </form>
                     {msg && <div className="user-msg">
                         <p>{msg}</p>

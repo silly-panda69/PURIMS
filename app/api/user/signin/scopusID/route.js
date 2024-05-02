@@ -35,7 +35,7 @@ export async function POST(req) {
                 const info = transporter.sendMail({
                   from: process.env.MAIL_URL,
                   to: email,
-                  subject: `hello`,
+                  subject: "Welcome to the Community! Your Registration is Confirmed. ",
                   text: "",
                   html: `<!DOCTYPE HTML PUBLIC "-//W3C//DTD XHTML 1.0 Transitional //EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
                                     <html xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -699,7 +699,7 @@ export async function POST(req) {
                 console.log("author",data1);
                 console.log("docs",data2);
                 data2=data2['search-results']['entry'];
-                const value1 = await insertAuthors(data1, scopusID);
+                const value1 = await insertAuthors(data1, scopusID,email);
                 const value2 = await insertDocuments(all_docs, data1, scopusID);
                 if(value1 && value2){
                   return NextResponse.json({ msg: "Successfully registered!", success: true });

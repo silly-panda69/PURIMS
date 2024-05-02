@@ -1293,7 +1293,7 @@ export const insertUser = async (email, password) => {
 //insert otp into the verification collection
 export const insertToken = async (email, token) => {
   const result = await verification.insertOne({ email, token, createdAt: new Date() });
-  const response = await verification.createIndex({ createdAt: 1 }, { expireAfterSeconds: 5 });
+  const response = await verification.createIndex({ createdAt: 1 }, { expireAfterSeconds: 60 });
   if (result) {
     return true;
   } else {
@@ -1549,8 +1549,8 @@ export const insertVerified = async (email) => {
       verified: true,
     }
   });
-  await verification.deleteOne({ email });
-  if (result) {
+  if (result?.modifiedCount) {
+    await verification.deleteOne({ email });
     return true;
   } else {
     return false;
@@ -2071,8 +2071,8 @@ export const insertDocuments = async (data, response, scopusID) => {
 export const insertAuthors = async (data, scopusID, email) => {
   console.log(data,scopusID,email);
   let afid = "";
-  console.log(data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]);
-  console.log(data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]["$"])
+  console.log("d1:",data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]);
+  console.log("d2:",data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]["$"])
   if (data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]) {
     if (data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]["$"]) {
       afid = data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]["$"];

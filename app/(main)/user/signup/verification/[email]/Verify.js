@@ -42,6 +42,7 @@ const Verify = ({ email }) => {
   }
   const submitHandler = async (e) => {
     e.preventDefault();
+    setLoading(true);
     try {
       const otp = token.join("");
       console.log(otp);
@@ -63,6 +64,7 @@ const Verify = ({ email }) => {
     catch (err) {
       setMsg("Error Verifying...");
     }
+    setLoading(false);
     setTimeout(() => {
       setMsg("");
     }, 3000);
@@ -115,9 +117,12 @@ const Verify = ({ email }) => {
                 )
               })}
             </div>
-            <div className='user-button'>
+            {!loading && <div className='user-button'>
               <button type='submit'>Verify OTP</button>
-            </div>
+            </div>}
+            {loading && <div className='user-button'>
+              <button disabled>Verifying...</button>
+            </div>}
           </form>
           {msg && <div className="user-msg">
             <p>{msg}</p>

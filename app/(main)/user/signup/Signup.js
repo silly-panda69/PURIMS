@@ -8,8 +8,10 @@ const Signup = () => {
     const [email,setEmail]=useState("");
     const [password,setPassword]=useState("");
     const [msg,setMsg]=useState("");
+    const [loading,setLoading]=useState(false);
     const submitHandler=async(e)=>{
         e.preventDefault();
+        setLoading(true);
         try{
             const response=await fetch("/api/user/signin",{
                 method: "POST",
@@ -28,6 +30,7 @@ const Signup = () => {
         catch(err){
             setMsg("Error Loging in...");
         }
+        setLoading(false);
         setTimeout(()=>{
             setMsg("");
         },3000);
@@ -49,9 +52,12 @@ const Signup = () => {
                         <input required type='password' value={password} onChange={e=>setPassword(e.target.value)}></input>
                         <label>Password</label>
                     </div>
-                    <div className='user-button'>
+                    {!loading && <div className='user-button'>
                         <button type='submit'>Sign up</button>
-                    </div>
+                    </div>}
+                    {loading && <div className='user-button'>
+                        <button disabled>Signing up...</button>
+                    </div>}
                 </form>
                 {msg && <div className="user-msg">
                     <p>{msg}</p>

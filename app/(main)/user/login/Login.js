@@ -10,9 +10,11 @@ const Login = () => {
     const [email,setEmail]=useState("");
     const [password,setPassword]=useState("");
     const [msg,setMsg]=useState("");
+    const [loading,setLoading]=useState(false);
     const submitHandler=async(e)=>{
         e.preventDefault();
         try{
+            setLoading(true);
             const result=await signIn("credential",{email,password,redirect: false});
             if(!result.error && result.ok){
                 router.refresh();
@@ -37,6 +39,7 @@ const Login = () => {
                     setMsg("Invalid Log in");
                 }
             }
+            setLoading(false);
         }
         catch(err){
             setMsg("Error Loging in...");
@@ -63,9 +66,13 @@ const Login = () => {
                         <input required type='password' value={password} onChange={e=>setPassword(e.target.value)}></input>
                         <label>Password</label>
                     </div>
-                    <div className='user-button'>
+                    {!loading && <div className='user-button'>
                         <button type='submit'>Login</button>
                     </div>
+                    }
+                    {loading && <div className='user-button'>
+                        <button disabled>Logging in...</button>
+                    </div>}
                 </form>
                 {msg && <div className="user-msg">
                     <p>{msg}</p>

@@ -19,15 +19,16 @@ export async function POST(req){
                 const hashPassword=await bcrypt.hashSync(password,salt);
                 const user=await insertUser(email,hashPassword);
                 if(user){
+                    const time=new Date();
                     const secret=process.env.HASH_SECRET;
+                    const custom=time+secret+email;
                     authenticator.options={digits: 4};
                     hotp.options={digits: 4};
-                    const time=new Date();
-                    const custom=time+secret+email;
                     const token=hotp.generate(custom,10);
                     const salt=await bcrypt.genSaltSync(10);
                     const hashOtp=await bcrypt.hashSync(token,salt);
                     const verify=await insertToken(email,hashOtp);
+                    console.log("otp1",token);
                     const transporter = nodemailer.createTransport({
                         service: "Gmail",
                         secure: false,
