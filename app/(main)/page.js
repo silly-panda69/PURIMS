@@ -52,7 +52,7 @@ export default async function Home() {
   );
 
 
-
+console.log(pubChart[0]);
 
 
 	

@@ -37,7 +37,8 @@ export async function POST(req){
                           pass: process.env.MAIL_SECRET,
                         },
                       });
-                    const info = transporter.sendMail({
+                    try{
+                      const info =  await transporter.sendMail({
                         from: process.env.MAIL_URL,
                         to: email,
                         subject: "Confirm your email address",
@@ -305,7 +306,9 @@ export async function POST(req){
                         
                         </html>`, 
                       });
-                      console.log(info);
+                    }catch(err){
+                      console.log(err);
+                    }
                     return NextResponse.json({msg: "Registered successfully!",success: true});
                 }else{
                     return NextResponse.json({msg: "Error signing up!",success: false});

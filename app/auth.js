@@ -37,7 +37,7 @@ export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
                             }else if(result.role && result.role!=="Author"){
                                 const isMatch=await bcrypt.compareSync(password,result.password);
                                 if(isMatch){
-                                    const user={email,password,role: result.role12};
+                                    const user={email,password,role: result.role};
                                     return user;
                                 }else{
                                     return null;
