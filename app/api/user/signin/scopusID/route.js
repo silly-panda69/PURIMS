@@ -350,7 +350,6 @@ export async function POST(req) {
                 },
               });
               const data1 = await res1.json();
-              console.log(data1);
               if (data1["author-retrieval-response"][0]['coredata']) {
                 const value1 = await insertAuthors(data1, scopusID, email);
                 const user = await insertScopusID(email, scopusID);

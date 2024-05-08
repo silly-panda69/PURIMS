@@ -246,12 +246,12 @@ console.log(pubChart[0]);
 						<span className="highlighted-text">Science</span>.
 					</div>
 				</div>
-{/*  {pubChart && <PubTypeChart                  
+ 				{pubChart && <PubTypeChart                  
 					baseURL={`/document`}
 					data={pubChart}
 					classType="col-span-4 fade-side-right"
 					classChart="col-span-8 fade-side-left bg-transparent"
-				/>}*/}
+				/>}
 				<SubTypeChart
 					baseURL={`/document`}
 					data={subtypeChart}
