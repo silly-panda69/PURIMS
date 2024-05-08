@@ -36,24 +36,30 @@ export default async function Header({ className = "" }) {
 				<Link className="mr-6" href={"/projects"}>
 					Projects
 				</Link>
-				{(session && session.user && session.user.email) && <Link className="mr-6" href={"/report"}>
-					Reports
+				{(session?.user?.email && (session?.role==="HOD" || session?.role==="Department" || session?.role==="Admin")) && <Link className="mr-6" href={"/report"}>
+					Report
 				</Link>}
-				{(session && session.user && session.user.email) && <div className="profile-click">
+				{(session?.user?.email) && <div className="profile-click">
 					<div className="profile-avatar">
-						{(session.scopusID && session.role === "Author" && author && author.profile.img) && <img src={author.profile.img} className="profile-avatar"></img>}
-						{(session.scopusID && session.role === "Author" && !author.profile.img) && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>}
-						{!(session.scopusID && (session.role === "Author")) && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>}
+						{(session?.scopusID && session?.role === "Author" && author && author.profile.img) && <img src={author.profile.img} className="profile-avatar"></img>}
+						{(session?.scopusID && session?.role === "Author" && !author.profile.img) && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>}
+						{(session?.deptID && session?.role === "HOD") && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>}
+						{(session?.deptID && session?.role === "Department") && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>}
+						{(session?.role === "Admin") && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>}
 						<div className="profile-display">
 							<div className="profile-dropdown">
 								<div className="profile-dropdown-avatar">
 									<div className="profile-avatar">
-										{(session.scopusID && session.role === "Author" && author && author.profile.img) && <img src={author.profile.img} className="profile-avatar"></img>}
-										{(session.scopusID && session.role === "Author" && !author.profile.img) && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>}
-										{(session.scopusID && (session.role !== "Author")) && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>}
+										{(session?.scopusID && session?.role === "Author" && author && author.profile.img) && <img src={author.profile.img} className="profile-avatar"></img>}
+										{(session?.scopusID && session?.role === "Author" && !author.profile.img) && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>}
+										{(session?.deptID && session?.role === "HOD") && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>}
+										{(session?.deptID && session?.role === "Department") && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>}
+										{(session?.role === "Admin") && <img src={'/user_avatar.jpeg'} className="profile-avatar"></img>}
 									</div>
 									<div className="profile-name">
-										{(!author && session.role === "Super_Admin") && <p>Admin</p>}
+										{(session?.deptID && session?.role === "HOD") && <p>HOD ({session?.deptID})</p>}
+										{(session?.deptID && session?.role === "Department") && <p>Department ({session?.deptID})</p>}
+										{(session?.role === "Admin") && <p>Admin</p>}
 										{author && author.profile && <p>{author.profile.firstName ? author.profile.firstName : ""} {author.profile.lastName ? author.profile.lastName : ""}</p>}
 										<p>{session.user.email}</p>
 									</div>
@@ -81,6 +87,22 @@ export default async function Header({ className = "" }) {
 										Resume
 									</Link>
 									<Link href={`/author/${session.scopusID}/reportgen`}>
+										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-text" viewBox="0 0 16 16">
+											<path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5" />
+											<path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z" />
+										</svg>
+										Report
+									</Link>
+								</>}
+								{(session?.deptID && (session?.role === "HOD" || session?.role==="Department")) && <>
+									<Link href={`/dept/${session?.deptID}`}>
+										<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+											<path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+											<path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
+										</svg>
+										Profile
+									</Link>
+									<Link href={`/dept/${session?.deptID}/reportgen`}>
 										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-text" viewBox="0 0 16 16">
 											<path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5" />
 											<path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z" />

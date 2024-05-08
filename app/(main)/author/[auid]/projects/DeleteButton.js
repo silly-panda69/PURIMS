@@ -2,7 +2,7 @@
 import { useRouter } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react'
 
-const DeleteButton = ( {id} ) => {
+const DeleteButton = ( {id,auid} ) => {
     const popRef=useRef();
     const router=useRouter();
     const [isOn,setisOn]=useState(false);
@@ -25,7 +25,7 @@ const DeleteButton = ( {id} ) => {
                     "Content-Type": "application/json",
                     "Accept": "application/json",
                 },
-                body: JSON.stringify({ id: id }),
+                body: JSON.stringify({ id: id ,auid: auid}),
             });
             const data = await res.json();
             if(data && data.result){

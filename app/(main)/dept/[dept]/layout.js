@@ -30,9 +30,6 @@ export default async function DepartmentView({ children, params = { dept: "" } }
 				<ActiveLinkChip slug={"shodhganga"} href={`/dept/${dept}/shodhganga`}>
 					Shodhganga
 				</ActiveLinkChip>
-				<ActiveLinkChip slug={"reportgen"} href={`/dept/${dept}/reportgen`}>
-					Reports
-				</ActiveLinkChip>
 			</div>
 			<Department data={data} className="col-span-12 self-stretch p-5" />
 			{children}

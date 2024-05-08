@@ -1838,48 +1838,54 @@ export const checkNewUser = async (auid) => {
   }
 }
 
+export const getAuthDocs=async(auid)=>{
+  const result=await documents.findOne({"authors.auid": auid});
+  if(result?.auid){
+    return result;
+  }else{
+    return null;
+  }
+}
+
 export const insertDocuments = async (data, response, scopusID) => {
   try {
     console.time();
     let co_auth = [];
-    const scopus_key=process.env.SCOPUS_KEY;
+    const scopus_key = process.env.SCOPUS_KEY;
     for (let i = 0; i < data.length; i++) {
       console.log(i + 1);
       console.log(data[i]['dc:identifier'].split("SCOPUS_ID:")[1]);
+      //for abstract
       const resx = await fetch(`https://api.elsevier.com/content/abstract/scopus_id/${data[i]['dc:identifier'].split("SCOPUS_ID:")[1]}?apiKey=${scopus_key}`, {
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/json",
         },
       });
+      //for references
       const references = await fetch(`https://api.crossref.org/works/${data[i]["prism:doi"]}`, {
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/json",
         },
       });
+      //for plum data like insta, facebook etc.
       let plumx = await fetch(`https://api.elsevier.com/analytics/plumx/doi/${data[i]["prism:doi"]}?apiKey=${scopus_key}`, {
         headers: {
           "Accept": "application/json",
           "Content-Type": "application/json",
         },
       });
-      console.log("plum");
+      let doc_depts=[];
       if (plumx.status === 200) {
         plumx = await plumx.json();
         plumx = plumx["count_categories"];
       } else {
         plumx = [];
       }
-      if (resx.status === 200) {
-        console.log('yes');
-      }
-      else {
-        console.log('no');
-      }
-      let refer1=[];
-      let funders="";
-      let refs="";
+      let refer1 = [];
+      let funders = "";
+      let refs = "";
       if (references.status === 200) {
         refs = await references.json();
         funders = refs["message"]["funder"];
@@ -1931,71 +1937,97 @@ export const insertDocuments = async (data, response, scopusID) => {
       let data23 = data1["authors"]["author"];
       let data2 = [];
       for (let i = 0; i < data23.length; i++) {
-        let author_data = await fetch(`https://api.elsevier.com/content/author/author_id/${data23[i]["@auid"]}?apiKey=${scopus_key}`, {
-          headers: {
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-          },
-        });
-        if (author_data.status === 200) {
-          author_data = await author_data.json();
-          let affdata = "";
-          if (author_data['author-retrieval-response'][0]["author-profile"]["affiliation-history"]["affiliation"]) {
-            let newaff = [];
-            affdata = author_data['author-retrieval-response'][0]["author-profile"]["affiliation-history"]["affiliation"]
-            for (let i = 0; i < affdata.length; i++) {
-              newaff.push(affdata[i]["ip-doc"]["sort-name"]);
+        const authCheck = await getAuthDocs(data23[i]["@auid"]);
+        const checkAuth = await authors.findOne({ scopusID: data23[i]["@auid"] });
+        if (authCheck?.auid) {
+          let doc_auth=authCheck?.authors?.map((e)=>{
+            if(e?.auid===data23[i]["@auid"]){
+              return doc_auth;
             }
-            affdata = newaff;
-          }
-          let afid = false;
-          if (data23[i]["affiliation"]) {
-            if (data23[i]["affiliation"]["@id"]) {
-              afid = true;
-            }
-          }
-          const checkAuth = await authors.findOne({ scopusID: data23[i]["@auid"] });
-          let dpD = "";
-          if (author_data['author-retrieval-response'][0]["author-profile"]["affiliation-history"]["affiliation"][0]) {
-            if (author_data['author-retrieval-response'][0]["author-profile"]["affiliation-history"]["affiliation"][0]["@affiliation-id"]) {
-              // console.log(author_data['author-retrieval-response'][0]["author-profile"]["affiliation-history"]["affiliation"][0]["@affiliation-id"])
-              dpD = author_data['author-retrieval-response'][0]["author-profile"]["affiliation-history"]["affiliation"][0]["@affiliation-id"]["@affiliation-id"]
-            }
-          }
-          let address = { country: "", city: "", postal: "" };
-          if (author_data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]) {
-            if (author_data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["address"]) {
-              let temp_add = author_data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["address"];
-              if (temp_add["@country"]) {
-                address["country"] = temp_add["@country"];
-              }
-              if (temp_add["city"]) {
-                address["city"] = temp_add["city"];
-              }
-              if (temp_add["postal-code"]) {
-                address["postal"] = temp_add["postal-code"];
-              }
-            }
-          }
+          });
+          doc_auth=doc_auth[0];
           data2.push({
-            givenName: data23[i]["preferred-name"]["ce:given-name"],
-            initials: data23[i]["preferred-name"]["ce:initials"],
-            surname: data23[i]["preferred-name"]["ce:surname"],
-            indexedName: data23[i]["preferred-name"]["ce:indexed-name"],
-            auid: data23[i]["@auid"],
-            seq: data23[i]["@seq"],
-            affiliation: [
-              {
-                afID: afid ? data23[i]["affiliation"]["@id"] : "",
-                dptID: dpD,
-                organization: affdata,
-                country: address["country"],
-                city: address["city"],
-                postalCode: address["postal"],
-              }
-            ],
+            givenName: doc_auth.givenName,
+            initials: doc_auth.initials,
+            surname: doc_auth.lastName,
+            indexedName: doc_auth.middleName,
+            auid: doc_auth._id,
+            seq: "",
+            affiliation: doc_auth.affiliation,
             inDb: checkAuth ? true : false
-          })
+          });
+          const new_arr=doc_depts.concat(doc_auth?.affiliation?.organization);
+          doc_depts=new_arr;
+        } else {
+          let author_data = await fetch(`https://api.elsevier.com/content/author/author_id/${data23[i]["@auid"]}?apiKey=${scopus_key}`, {
+            headers: {
+              "Accept": "application/json",
+              "Content-Type": "application/json",
+            },
+          });
+          if (author_data.status === 200) {
+            author_data = await author_data.json();
+            let affdata = "";
+            if (author_data['author-retrieval-response'][0]["author-profile"]["affiliation-history"]["affiliation"]) {
+              let newaff = [];
+              affdata = author_data['author-retrieval-response'][0]["author-profile"]["affiliation-history"]["affiliation"]
+              for (let i = 0; i < affdata.length; i++) {
+                newaff.push(affdata[i]["ip-doc"]["sort-name"]);
+              }
+              affdata = newaff;
+            }
+            let afid = false;
+            if (data23[i]["affiliation"]) {
+              if (data23[i]["affiliation"]["@id"]) {
+                afid = true;
+              }
+            }
+            const checkAuth = await authors.findOne({ scopusID: data23[i]["@auid"] });
+            let dpD = "";
+            if (author_data['author-retrieval-response'][0]["author-profile"]["affiliation-history"]["affiliation"][0]) {
+              if (author_data['author-retrieval-response'][0]["author-profile"]["affiliation-history"]["affiliation"][0]["@affiliation-id"]) {
+                // console.log(author_data['author-retrieval-response'][0]["author-profile"]["affiliation-history"]["affiliation"][0]["@affiliation-id"])
+                dpD = author_data['author-retrieval-response'][0]["author-profile"]["affiliation-history"]["affiliation"][0]["@affiliation-id"]["@affiliation-id"]
+              }
+            }
+            let address = { country: "", city: "", postal: "" };
+            if (author_data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]) {
+              if (author_data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["address"]) {
+                let temp_add = author_data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["address"];
+                if (temp_add["@country"]) {
+                  address["country"] = temp_add["@country"];
+                }
+                if (temp_add["city"]) {
+                  address["city"] = temp_add["city"];
+                }
+                if (temp_add["postal-code"]) {
+                  address["postal"] = temp_add["postal-code"];
+                }
+              }
+            }
+            data2.push({
+              givenName: data23[i]["preferred-name"]["ce:given-name"],
+              initials: data23[i]["preferred-name"]["ce:initials"],
+              surname: data23[i]["preferred-name"]["ce:surname"],
+              indexedName: data23[i]["preferred-name"]["ce:indexed-name"],
+              auid: data23[i]["@auid"],
+              seq: data23[i]["@seq"],
+              affiliation: [
+                {
+                  afID: afid ? data23[i]["affiliation"]["@id"] : "",
+                  dptID: dpD,
+                  organization: affdata,
+                  country: address["country"],
+                  city: address["city"],
+                  postalCode: address["postal"],
+                }
+              ],
+              inDb: checkAuth ? true : false
+            });
+            const new_arr=doc_depts.concat(affdata);
+            doc_depts=new_arr;
+
+          }
         }
       }
       const new_co_auth = co_auth.concat(data2);
@@ -2042,12 +2074,10 @@ export const insertDocuments = async (data, response, scopusID) => {
           authors: data2,
           plum: plumx ? plumx : "",
           crossref: {
-            citedByCount: refs?refs["message"]["is-referenced-by-count"]:0,
-            funder: funders?funders:[],
+            citedByCount: refs ? refs["message"]["is-referenced-by-count"] : 0,
+            funder: funders ? funders : [],
           },
-          departments: [
-            {}
-          ],
+          departments: doc_depts?doc_depts:[],
           coverDate: new Date(data[i]["prism:coverDate"]),
           correspondence: [],
           authorCount: data2.length,
@@ -2069,10 +2099,9 @@ export const insertDocuments = async (data, response, scopusID) => {
 }
 
 export const insertAuthors = async (data, scopusID, email) => {
-  console.log(data,scopusID,email);
   let afid = "";
-  console.log("d1:",data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]);
-  console.log("d2:",data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]["$"])
+  console.log("d1:", data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]);
+  console.log("d2:", data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]["$"])
   if (data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]) {
     if (data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]["$"]) {
       afid = data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]["$"];
@@ -2085,9 +2114,9 @@ export const insertAuthors = async (data, scopusID, email) => {
       }
     }
   }
-  const name=data['author-retrieval-response'][0]["author-profile"]['preferred-name']['given-name']+" "+data['author-retrieval-response'][0]["author-profile"]['preferred-name']['surname'];
+  const name = data['author-retrieval-response'][0]["author-profile"]['preferred-name']['given-name'] + " " + data['author-retrieval-response'][0]["author-profile"]['preferred-name']['surname'];
   console.log(name);
-  const llm="";
+  const llm = "";
   const result = await authors.insertOne({
     _id: scopusID,
     scopusID: scopusID,

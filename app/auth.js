@@ -34,7 +34,23 @@ export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
                                 }else{
                                     return null;
                                 }
-                            }else if(result.role && result.role!=="Author"){
+                            }else if(result?.role==="Department"){
+                                const isMatch=await bcrypt.compareSync(password,result.password);
+                                if(isMatch){
+                                    const user={email,password,role: result.role,deptID: result.deptID};
+                                    return user;
+                                }else{
+                                    return null;
+                                }
+                            }else if(result?.role==="HOD"){
+                                const isMatch=await bcrypt.compareSync(password,result.password);
+                                if(isMatch){
+                                    const user={email,password,role: result.role,deptID: result.deptID};
+                                    return user;
+                                }else{
+                                    return null;
+                                }
+                            }else if(result?.role==="Admin"){
                                 const isMatch=await bcrypt.compareSync(password,result.password);
                                 if(isMatch){
                                     const user={email,password,role: result.role};
@@ -65,6 +81,9 @@ export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
                 if(user.scopusID){
                     token.scopusID=user.scopusID;
                 }
+                if(user.deptID){
+                    token.deptID=user.deptID;
+                }
             }
             return Promise.resolve(token);
         },
@@ -72,6 +91,9 @@ export const { handlers: { GET, POST }, auth, signIn, signOut } = NextAuth({
             session.role=token.role;
             if(token.scopusID){
                 session.scopusID=token.scopusID;
+            }
+            if(token.deptID){
+                session.deptID=token.deptID;
             }
             return Promise.resolve(session);
         }

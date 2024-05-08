@@ -1,4 +1,4 @@
-import { getAllAuthor,getDepartmentbyName } from "@/utils/mongo";
+import { getAllAuthor,getAuthor,getDepartmentbyName } from "@/utils/mongo";
 import AddProject from "./AddProject";
 import { auth } from "@/app/auth";
 import { redirect } from "next/navigation";
@@ -6,22 +6,15 @@ import { redirect } from "next/navigation";
 export default async function AddPage({params}){
     const {auid}=params;
     let dept;
-    let author;
+    let authors;
+    let author=await getAuthor(auid);
     const session=await auth();
-    if((session && session.user.email && session.scopusID && session.scopusID===auid && session.role==="Author")){
+    if((session?.user?.email && ((session?.role==="Admin") || (session?.scopusID===auid && session?.role==="Author") || (session?.deptID===author?.dept && (session?.role==="HOD" || session?.role==="Department")))) ){
         dept=await getDepartmentbyName();
-        author=await getAllAuthor();
+        authors=await getAllAuthor();
         return(
             <>
-                <AddProject dept={dept} author={author} auid={auid}/>
-            </>
-        )
-    }else if(session && session.user.email && (session.role==="Admin" || session.role==="Super_Admin")){
-        dept=await getDepartmentbyName();
-        author=await getAllAuthor();
-        return(
-            <>
-                <AddProject dept={dept} author={author} auid={auid}/>
+                <AddProject dept={dept} author={authors} auid={auid}/>
             </>
         )
     }else{

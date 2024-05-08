@@ -6,8 +6,12 @@ export default async function LoginPage(){
     const session=await auth();
     if(session && session.user && session.user.email && session.scopusID){
         redirect(`/author/${session.scopusID}`);
-    }else if(session && session.user && session.user.email && (session.role==="Super_Admin" || session.role==="Admin")){
-        redirect('/');
+    }else if(session?.user?.email && session?.role==="HOD" && session?.deptID){
+        redirect(`/dept/${session.deptID}`);
+    }else if(session?.user?.email && session?.role==="Department" && session?.deptID){
+        redirect(`/dept/${session.deptID}`);
+    }else if(session?.user?.email && session?.role==="Admin"){
+        redirect(`/`);
     }else{
         return (
             <div><Login/></div>
