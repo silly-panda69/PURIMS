@@ -350,7 +350,9 @@ export async function POST(req) {
                 },
               });
               const data1 = await res1.json();
-              if (data1["author-retrieval-response"][0]?.coredata) {
+              if (data1["author-retrieval-response"][0]['coredata']) {
+                const value1 = await insertAuthors(data1, scopusID, email);
+                const user = await insertScopusID(email, scopusID);
                 // const authorName = res1['author-retrieval-response'][0]["author-profile"]['preferred-name']['given-name'] + res1['author-retrieval-response'][0]["author-profile"]['preferred-name']['surname'];
                 // const transporter = nodemailer.createTransport({
                 //   service: "Gmail",
@@ -692,8 +694,6 @@ export async function POST(req) {
                   all_docs = temp;
                 }
                 data2 = data2['search-results']['entry'];
-                const value1 = await insertAuthors(data1, scopusID, email);
-                const user = await insertScopusID(email, scopusID);
                 const value2 = insertDocuments(all_docs, data1, scopusID);
                 if (value1 && value2) {
                   return NextResponse.json({ msg: "Successfully registered!", success: true });

@@ -2100,8 +2100,6 @@ export const insertDocuments = async (data, response, scopusID) => {
 
 export const insertAuthors = async (data, scopusID, email) => {
   let afid = "";
-  console.log("d1:", data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]);
-  console.log("d2:", data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]["$"])
   if (data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]) {
     if (data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]["$"]) {
       afid = data['author-retrieval-response'][0]["author-profile"]["affiliation-current"]["affiliation"]["ip-doc"]["parent-preferred-name"]["$"];
@@ -2115,7 +2113,6 @@ export const insertAuthors = async (data, scopusID, email) => {
     }
   }
   const name = data['author-retrieval-response'][0]["author-profile"]['preferred-name']['given-name'] + " " + data['author-retrieval-response'][0]["author-profile"]['preferred-name']['surname'];
-  console.log(name);
   const llm = "";
   const result = await authors.insertOne({
     _id: scopusID,
