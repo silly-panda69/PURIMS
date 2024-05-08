@@ -11,6 +11,7 @@ const ScopusID = ({email}) => {
     const submitHandler = async (e) => {
         e.preventDefault();
         setLoading(true);
+        console.log('t');
         try {
             const changedEmail = email.replace("%40", "@");
             const response = await fetch("/api/user/signin/scopusID", {
