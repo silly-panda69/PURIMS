@@ -32,27 +32,14 @@ import Globe3D from "@/components/Globe3D";
 import XIcon from "@/icons/X";
 
 export default async function Home() {
+	const start=performance.now();
 	let data = await getDepts();
 	data = data?.filter((d) => d._id != "pu");
 	const subjectChart = await getDepartmentSubjectChart("pu");
 	const yearlyChart = await getDepartmentYearlyChart("pu");
-	const  pubChartData = await getDepartmentPubChart("pu");
+	const  pubChart = await getDepartmentPubChart("pu");
 
-   const pubChart = await Promise.all(
-    pubChartData?.map(async (item) => {
-      return {
-        _id: item._id,
-        id: item._id.sourceID,
-        label: item._id.source,
-
-        metrics: item.metrics,
-        value: item.value,
-      };
-    })
-  );
-
-
-console.log(pubChart[0]);
+   
 
 
 	
@@ -62,7 +49,8 @@ console.log(pubChart[0]);
 	const totalProjectFund= await univprojectfund();
 	const totalPhds=await univphds();
 	const totalProjects=await univprojects();
-	
+	const end=performance.now();
+	console.log("time",(end-start)/1000);
 	const { TWEET_COUNT} = await getDepartmentSocialMetrics("pu");
 	{/*{ let impact = pubChart.reduce(
 		(p, t) => p + (parseInt(t.metrics?.impactFactorData?.metrics?.impactMetrics?.jif) || 0) * t.value,

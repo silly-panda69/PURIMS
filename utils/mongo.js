@@ -1067,6 +1067,7 @@ export const getDepartmentSubjectChart = cache(
 );
 
 export const getDepartmentPubChart = cache(async (dept, { from, to } = {}) => {
+  const start=performance.now();
   let chart = await documents
     .aggregate([
       {
@@ -1136,8 +1137,9 @@ export const getDepartmentPubChart = cache(async (dept, { from, to } = {}) => {
       },
     ])
     .toArray();
-
-  return chart;
+    const end=performance.now();
+    console.log("Time taken to fetch data from DB: "+(end-start)+"ms");
+    return chart;
 });
 
 export const getDepartmentWorldChart = cache(
