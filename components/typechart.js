@@ -6,10 +6,12 @@ import { Colors } from "@/utils/nivoThemes";
 import { useState } from "react";
 import { debounce } from "lodash"
 import Search_icon from "@/icons/Search_icon";
+import { useRef } from "react";
 
 export default function SubTypeChart({ data, classType = "", classChart = "" }) {
 	data.sort((a, b) => b.value - a.value)
 	const [record, setRecord] = useState(data);
+	const [inputValue,setinputValue]=useState();
 
 	const filter = debounce((searchText) => {
 		setRecord(data.filter((f) => f.id.toLowerCase().includes(searchText)));
@@ -18,33 +20,40 @@ export default function SubTypeChart({ data, classType = "", classChart = "" }) 
 	// Handle the onChange event
 	const handleInputChange = (e) => {
 		const searchText = e.target.value.toLowerCase();
+		setinputValue(searchText);
 		filter(searchText); // Call the filter function with the search text
 	};
 
 	const [isInputVisible, setIsInputVisible] = useState(false); // State to control input visibility
 
 	// Function to toggle input visibility when the search icon is clicked
-	const toggleInputVisibility = () => {
-		setIsInputVisible((prevState) => !prevState);
-	};
+	const inputRef = useRef(null);
+	const toggleBtn = (e) => {
+		if (inputRef.current) {
+			const value = !isInputVisible;
+			if (value) {
+				inputRef.current.className = "input-inner-on";
+			} else {
+				inputRef.current.className = "input-inner";
+				setRecord(data);
+				setinputValue("");
+			}
+			setIsInputVisible((prevState) => !prevState);
+		}
+	}
 	return (
 		<>
 			<Card className={classType}>
 				<CardContent>
 
-					<div className="flex justify-between ">
-						<h3>Document Types</h3>
-						{isInputVisible && (<input
-
-							type="text"
-							placeholder="Search..."
-							className="ml-1 p-1 mt-2 mb-0 outline-none text-sm  text-white font-normal"
-							style={{ width: "100px", height: "30px" }}
-							onChange={handleInputChange}
-						/>)}
-						<button className="mb-0" onClick={toggleInputVisibility}>
-							<Search_icon width="25" height="38" />
-						</button>
+					<div className={(isInputVisible) ? "flex justify-end align-items-center" : "flex justify-between align-items-center"}>
+						{!isInputVisible && <h3 style={{ padding: "0", marginBottom: "10px",overflow: "hidden",textOverflow: "ellipsis",whiteSpace: "nowrap" }}>Document Types</h3>}
+						<div className="input-inner" ref={inputRef}>
+							<input type="text" value={inputValue} onChange={handleInputChange} placeholder="Search document types..."></input>
+							<button className="mb-0" onClick={() => toggleBtn()}>
+								<Search_icon width="25" height="38" />
+							</button>
+						</div>
 					</div>
 					<ol className="flex flex-col h-96 overflow-y-scroll">
 						{record?.map(({ id, value }, i) => (

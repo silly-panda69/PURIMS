@@ -6,7 +6,7 @@ import { ResponsiveCirclePacking } from "@nivo/circle-packing";
 import Chip from "./UI/Chip";
 import Link from "next/link";
 import DocIcon from "@/icons/docIcon";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { debounce } from "lodash";
 import Search_icon from "@/icons/Search_icon";
 
@@ -29,6 +29,7 @@ export default function PubTypeChart({ baseURL, auid, data, classType = "", clas
 		})),
 	};
 	const [record, setRecord] = useState(data);
+	const [inputValue,setinputValue]=useState();
 
 	const filter = debounce((searchText) => {
 		setRecord(data.filter((f) => f.label.toLowerCase().includes(searchText)));
@@ -37,23 +38,25 @@ export default function PubTypeChart({ baseURL, auid, data, classType = "", clas
 	// Handle the onChange event
 	const handleInputChange = (e) => {
 		const searchText = e.target.value.toLowerCase();
+		setinputValue(searchText);
 		filter(searchText); // Call the filter function with the search text
 	};
 
 	const [isInputVisible, setIsInputVisible] = useState(false); // State to control input visibility
 
 	// Function to toggle input visibility when the search icon is clicked
-	const inputRef=useRef(null);
-	const toggleBtn=(e)=>{
-		if(inputRef.current){
-			setIsInputVisible((prevState) => !prevState);
-			if(isInputVisible){
-				console.log('yes');
-				inputRef.current.className="input-inner-on";
-			}else{
-				console.log('no');
-				inputRef.current.className="input-inner";
+	const inputRef = useRef(null);
+	const toggleBtn = (e) => {
+		if (inputRef.current) {
+			const value = !isInputVisible;
+			if (value) {
+				inputRef.current.className = "input-inner-on";
+			} else {
+				inputRef.current.className = "input-inner";
+				setRecord(data);
+				setinputValue("");
 			}
+			setIsInputVisible((prevState) => !prevState);
 		}
 	}
 	return (
@@ -147,11 +150,11 @@ export default function PubTypeChart({ baseURL, auid, data, classType = "", clas
 			</Card>
 			<Card className={classType}>
 				<CardContent>
-					<div className="flex justify-between align-">
-						{!isInputVisible && <h4>Publications</h4>}
+					<div className={(isInputVisible)?"flex justify-end align-items-center":"flex justify-between align-items-center"}>
+						{!isInputVisible && <h3 style={{padding: "0",marginBottom: "10px"}}>Publications</h3>}
 						<div className="input-inner" ref={inputRef}>
 							<input type="text" onChange={handleInputChange} placeholder="Search publications..."></input>
-							<button className="mb-0" onClick={toggleBtn}>
+							<button className="mb-0" onClick={()=>toggleBtn()}>
 								<Search_icon width="25" height="38" />
 							</button>	
 						</div>

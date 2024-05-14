@@ -947,7 +947,7 @@ details.open-card[open] {
 }
 
 .input-inner{
-	background-color: rgba(14, 13, 13, 0.733);
+	background-color: rgba(24, 22, 22, 0.733);
 	display: flex;
 	justify-content: end;
 	align-items: center;
@@ -956,13 +956,15 @@ details.open-card[open] {
 	height: 35px;
 	width: 35px;
 	margin-bottom: 10px;
+	transition: 0.3s;
 }
 
 .input-inner-on{
 	transition: 0.3s;
 	border-radius: 25px;
-	background-color: rgba(14, 13, 13, 0.733);
+	background-color: rgba(24, 22, 22, 0.733);
 	display: flex;
+	width: 100%;
 	justify-content: end;
 	align-items: center;
 	padding-top: 8px;
@@ -975,14 +977,18 @@ details.open-card[open] {
 
 .input-inner-on input{
 	display: block;
-	margin-bottom: 5px;
+	margin-bottom: 9px;
 	width: 100%;
 	outline: none;
 	padding-left: 6px;
-	font-size: 14px;
-	background-color: rgba(14, 13, 13, 0.733);
+	font-size: 16px;
+	background-color: transparent;
+	border-color:transparent;
+	text-shadow: none !important;
 }
 
 .input-inner input{
 	display: none;
+	background-color: transparent;
+	border-color: transparent;
 }
