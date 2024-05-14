@@ -15,18 +15,18 @@ export default async function DeptAuthors({ params = { dept: "" }, searchParams 
 		throw "Invalid page number!";
 	}
 	const data = await getDepartment(dept);
-	const authors = await getAuthorsByDept(dept);
+	const authors = await getAuthorsByDept(dept,page);
 	
 	return (
 		<>
 			<Filters data={data} className="col-span-4" />
-			<AuthorList page={page} authCount={data.authorCount} data={authors} className="col-span-8" />
+			<AuthorList page={page} pageSize={10} authCount={data.authorCount} data={authors} className="col-span-8" />
 			<PageSelect page={page} itemCount={data.authorCount} />
 		</>
 	);
 }
 
-async function PageSelect({ page = 1, itemCount, pageSize = 25 }) {
+async function PageSelect({ page = 1, itemCount, pageSize = 10 }) {
 	let max = Math.ceil(itemCount / pageSize);
 	return (
 		<div className="col-span-8 col-start-5 flex flex-row justify-between items-center">

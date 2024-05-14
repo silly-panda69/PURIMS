@@ -34,7 +34,7 @@ export default async function AuthorView({ params = { auid: "" }, searchParams }
 	const yearlyChart = await getAuthorYearlyChart(auid, { from: searchParams.from, to: searchParams.to });
 	let years = yearlyChart.map((y) => y.x);
 
-	if(session?.scopusID===auid && session?.role==="Author"){
+	if((session?.scopusID===auid && session?.role==="Author")){
 		return <TimePicker
 			subject={`${authData.profile.lastName}${authData.profile.lastName && ", "}${authData.profile.firstName} ${authData.profile.middleName || ""}`}
 			fromD={searchParams.from}

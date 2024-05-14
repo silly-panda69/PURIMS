@@ -32,26 +32,21 @@ import Globe3D from "@/components/Globe3D";
 import XIcon from "@/icons/X";
 
 export default async function Home() {
-	const start=performance.now();
+	const start = performance.now();
 	let data = await getDepts();
 	data = data?.filter((d) => d._id != "pu");
 	const subjectChart = await getDepartmentSubjectChart("pu");
 	const yearlyChart = await getDepartmentYearlyChart("pu");
-	const  pubChart = await getDepartmentPubChart("pu");
-
-   
-
-
-	
+	const pubChart = await getDepartmentPubChart("pu");
 	const subtypeChart = await getDepartmentSubtypeChart("pu");
 	const world = await getDepartmentWorldChart("pu");
 	const metrics = await getMetrics({ dept: "pu" });
-	const totalProjectFund= await univprojectfund();
-	const totalPhds=await univphds();
-	const totalProjects=await univprojects();
-	const end=performance.now();
-	console.log("time",(end-start)/1000);
-	const { TWEET_COUNT} = await getDepartmentSocialMetrics("pu");
+	const totalProjectFund = await univprojectfund();
+	const totalPhds = await univphds();
+	const totalProjects = await univprojects();
+	const end = performance.now();
+	console.log("time", (end - start) / 1000);
+	const { TWEET_COUNT } = await getDepartmentSocialMetrics("pu");
 	{/*{ let impact = pubChart.reduce(
 		(p, t) => p + (parseInt(t.metrics?.impactFactorData?.metrics?.impactMetrics?.jif) || 0) * t.value,
 		0
@@ -63,9 +58,9 @@ export default async function Home() {
 				<div id="home-top-front" className="relative p-2">
 					<h1 className="home-title flex justify-center items-center">
 						<img src="/Panjab_University_logo.png" className="h-32 mr-4" alt="PU Logo" />
-						<div style={{display: "flex",justifyContent: "start",alignItems:"start"}}>
+						<div style={{ display: "flex", justifyContent: "start", alignItems: "start" }}>
 							<p className="gradient-text">PU RIMS</p>
-							<p className="gradient-text" style={{fontSize: "14px",marginTop: "8px",letterSpacing: "1px"}}>beta</p>
+							<p className="gradient-text" style={{ fontSize: "14px", marginTop: "8px", letterSpacing: "1px" }}>beta</p>
 						</div>
 					</h1>
 					<div className="mb-6 big-text">Panjab University Research Information Management System</div>
@@ -129,7 +124,7 @@ export default async function Home() {
 						</Icon>
 					}
 				/>
-{/*	<StatCard
+				{/*	<StatCard
 					className="col-span-4 self-stretch"
 					stat={impact}
 					statTitle={"Total Impact Factor"}
@@ -171,8 +166,8 @@ export default async function Home() {
 					statDesc={"On CrossRef"}
 					icon={<CrossRefIcon width={150} height={48} />}
 				/>
-                 
-				 <StatCard
+
+				<StatCard
 					className="col-span-4 self-stretch"
 					stat={totalProjects}
 					statTitle={"Research Projects "}
@@ -193,7 +188,7 @@ export default async function Home() {
 					stat={totalPhds}
 					statTitle={"Phds"}
 					statDesc="Number of Phds awarded"
-					icon={<Phd_icon/>}
+					icon={<Phd_icon />}
 					iconClass=""
 				/>
 
@@ -228,13 +223,41 @@ export default async function Home() {
 				<div className="col-span-12 text-center mb-8 mt-32 fade-scroll">
 					<div className="mb-1 huge-text">Featured among prestigious journals</div>
 					<div className="max-w-3xl big-text mx-auto">
-						Work done by Panjab University's researchers have been featured in numerous prestigious
-						journals, such as <span className="highlighted-text">Nature</span>,{" "}
-						<span className="highlighted-text">Chemical Reviews</span> and{" "}
-						<span className="highlighted-text">Science</span>.
+						Work done by Panjab University's researchers have featured in
+						numerous prestigious journals, such as{" "}
+						<span className="highlighted-text hover:text-blue-900">
+							<Link
+								href={
+									"/document/?page=1&sort=coverDate&order=descending&pub=21206"
+								}
+							>
+								Nature
+							</Link>
+						</span>
+						,{" "}
+						<span className="highlighted-text hover:text-blue-900">
+							<Link
+								href={
+									"/document/?page=1&sort=coverDate&order=descending&pub=23340"
+								}
+							>
+								Chemical Reviews
+							</Link>
+						</span>{" "}
+						and{" "}
+						<span className="highlighted-text hover:text-blue-900">
+							<Link
+								href={
+									"/document/?page=1&sort=coverDate&order=descending&pub=23571"
+								}
+							>
+								Science
+							</Link>
+						</span>
+						.
 					</div>
 				</div>
- 				{pubChart && <PubTypeChart                  
+				{pubChart && <PubTypeChart
 					baseURL={`/document`}
 					data={pubChart}
 					classType="col-span-4 fade-side-right"

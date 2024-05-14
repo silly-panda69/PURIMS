@@ -31,13 +31,16 @@ import SearchBar from "@/components/searchBar";
 // 	);
 // }
 
-export default async function DeptAuthors({ searchParams = { page: 1 } }) {
+export default async function DeptAuthors({ params = { dept: "" }, searchParams = { page: 1 } }) {
+	const dept = decodeURIComponent(params.dept);
 	let page = parseInt(searchParams.page) || 1;
 	if (page < 1) {
 	  throw "Invalid page number!";
 	}
 	let urlParams = new URLSearchParams(searchParams);
-	const ganga = await getShodh({...searchParams });
+	const ganga = await getShodh({...searchParams, dept: dept === 'pu' ? null : dept });
+
+	
 	const depts = await getDepartmentNames();
 	return (
 	  <>

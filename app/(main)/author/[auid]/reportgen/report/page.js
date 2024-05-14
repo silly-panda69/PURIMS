@@ -72,7 +72,7 @@ export default async function AuthorView({ params = { auid: "" }, searchParams }
 	result.forEach(item=>{
 	  projectFund+=item.amount_allocated;
 	})
-	
+	console.log(authData.dept);
 	const totalphds=  await authorwisephds (authData.profile.firstName,authData.profile.lastName,authData.dept)
 	const session=await auth();
 
@@ -80,7 +80,8 @@ export default async function AuthorView({ params = { auid: "" }, searchParams }
 	let authorName = `${authData.profile.lastName}${authData.profile.lastName && ", "}${authData.profile.firstName} ${
 		authData.profile.middleName || ""
 	}`;
-	if(session?.scopusID===auid && session?.role==="Author"){
+	if((session?.scopusID===auid && session?.role==="Author")||(session?.role==="Admin")||((session?.role==="Department" || session?.role==="HOD") && session?.deptID===authData.dept)){
+
 		return (
 			<>
 				<div className="col-span-12 my-6 px-8 text-5xl">
@@ -279,7 +280,7 @@ export default async function AuthorView({ params = { auid: "" }, searchParams }
 			</>
 		);
 	}else{
-		redirect('/');
+		// redirect('/');
 	}
 }
 

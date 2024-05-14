@@ -4,6 +4,9 @@ import { Colors } from "@/utils/nivoThemes";
 import Card from "./UI/Card";
 import CardContent from "./UI/CardContent";
 import { ResponsiveCirclePacking } from "@nivo/circle-packing";
+import { useState } from "react";
+import {debounce} from "lodash";
+import Search_icon from "@/icons/Search_icon";
 
 export default function SubjectChart({ data, classType = "", classChart = "" }) {
 	data.sort((a, b) => b.value - a.value);
@@ -25,13 +28,44 @@ export default function SubjectChart({ data, classType = "", classChart = "" }) 
 			children: [{ name: d.id, color: Colors[i % Colors.length], value: d.value }],
 		})),
 	};
+	const [record, setRecord] = useState(data);
+
+	const filter = debounce((searchText) => {
+		setRecord(data.filter((f) => f.id.toLowerCase().includes(searchText)));
+	}, 300);
+
+	// Handle the onChange event
+	const handleInputChange = (e) => {
+		const searchText = e.target.value.toLowerCase();
+		filter(searchText); // Call the filter function with the search text
+	};
+
+	const [isInputVisible, setIsInputVisible] = useState(false); // State to control input visibility
+
+	// Function to toggle input visibility when the search icon is clicked
+	const toggleInputVisibility = () => {
+		setIsInputVisible((prevState) => !prevState);
+	};
 	return (
 		<>
 			<Card className={classType}>
 				<CardContent>
-					<h2>Subjects</h2>
+					<div className="flex justify-between ">
+						<h2>Subjects</h2>
+						{isInputVisible && (<input
+
+							type="text"
+							placeholder="Search..."
+							className="grow m-2 mr-3 pl-4 mb-4 outline-none text-sm w-full text-white font-normal"
+
+							onChange={handleInputChange}
+						/>)}
+						<button className="mb-0" onClick={toggleInputVisibility}>
+							<Search_icon width="25" height="38" />
+						</button>
+					</div>
 					<ol className="flex flex-col h-96 overflow-y-scroll overlay-scroll">
-						{data.map(({ id, value }, i) => (
+						{record.map(({ id, value }, i) => (
 							<li key={i} className="flex flex-row items-center p-2 gap-3 border-divider">
 								<div
 									className="w-8 h-8 rounded-full border-2 border-white shrink-0"

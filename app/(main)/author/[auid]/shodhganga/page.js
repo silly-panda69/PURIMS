@@ -2,7 +2,7 @@ import PageSelect from "@/components/PageSelect";
 import Card from "@/components/UI/Card";
 import CardContent from "@/components/UI/CardContent";
 import DocChips from "@/components/docChips";
-import { getAuthor, getShodh } from "@/utils/mongo";
+import { getAuthor, getShodh, getShodhAuthor } from "@/utils/mongo";
 import ShodhgangaFilters from "@/components/shodhgangaFilter";
 import ShodhList from "@/components/ShodhList";
 import SearchBar from "@/components/searchBar";
@@ -18,12 +18,16 @@ export default async function AuthorShodh({ params = { auid: "" }, searchParams 
 	}
 	let urlParams = new URLSearchParams(searchParams);
 	const a = await getAuthor(auid);
-	const ganga = await getShodh({
+
+	const ganga = await getShodhAuthor({
 		...searchParams,
 		dept: a.dept,
-
-		regexp: `(${a.profile.firstName})|(${a.profile.firstname} ${a.profile.lastName})|(${a.profile.lastName}, ${a.profile.firstName})`,
+		firstName:a.profile.firstName,
+		lastName:a.profile.lastName
+		
+		// regexp: (${a.profile.firstName})|(${a.profile.firstname} ${a.profile.lastName})|(${a.profile.lastName}, ${a.profile.firstName}),
 	});
+	
 	return (
 		<>
 			<ShodhgangaFilters className="col-span-4 row-span-2" />

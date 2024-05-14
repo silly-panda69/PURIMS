@@ -4,15 +4,18 @@ import Button from '@/components/UI/Button';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 
-const Report = ({ dept}) => {
+const Report = ({ dept }) => {
     const [authors, setAuthors] = useState([]);
     const [from, setFrom] = useState("1950-01");
     const [to, setTo] = useState("2024-05");
-    const [auid, setAuid] = useState("");
+    const [auid, setAuid] = useState("All Author");
     const session = useSession();
+    console.log(dept);
+    const [deptnow,setdeptnow]=useState();
     useEffect(() => {
         const fetchData = async () => {
             const depts = dept[0];
+            setdeptnow(depts);
             const res = await fetch("/api/report", {
                 method: "POST",
                 headers: {
@@ -31,6 +34,7 @@ const Report = ({ dept}) => {
     const addData = async (e) => {
         try {
             if (e.target && e.target.value) {
+                setdeptnow(e.target.value);
                 const dept = e.target.value;
                 const res = await fetch("/api/report", {
                     method: "POST",
@@ -55,24 +59,24 @@ const Report = ({ dept}) => {
                 <div className='report-inner'>
                     <div>
                         <h4>Department</h4>
-                        {(session?.data?.user?.email && session?.data?.role==="Admin") && <select onChange={(e) => addData(e)}>
+                        {(session?.data?.user?.email && session?.data?.role === "Admin") && <select onChange={(e) => addData(e)}>
                             {dept && dept.map((e) => {
                                 return <option value={e}>
                                     {e}
                                 </option>
                             })}
                         </select>}
-                        {(session?.data?.user?.email && (session?.data?.role==="HOD" || session?.data?.role==="Department")) && <select>
+                        {(session?.data?.user?.email && (session?.data?.role === "HOD" || session?.data?.role === "Department")) && <select>
                             <option value={session?.data?.deptID}>{session?.data?.deptID}</option>
                         </select>}
                     </div>
                     <div>
                         <h4>Author</h4>
-                        {(session?.data?.user?.email && (session?.data?.role==="HOD" || session?.data?.role==="Department" || session?.data?.role==="Admin")) && <select onChange={(e) => setAuid(e.target.value)}>
-                            <option value={""} default hidden>Author</option>
+                        {(session?.data?.user?.email && (session?.data?.role === "HOD" || session?.data?.role === "Department" || session?.data?.role === "Admin")) && <select onChange={(e) => setAuid(e.target.value)}>
+                            <option default value={"All Author"}>All Author</option>
                             {authors && authors.map((e) => {
                                 return <option value={e._id}>
-                                    {e.profile.firstName + " " +(e.profile.middleName?e.profile.middleName:"") + " " + e.profile.lastName}
+                                    {e.profile.firstName + " " + (e.profile.middleName ? e.profile.middleName : "") + " " + e.profile.lastName}
                                 </option>
                             })}
                         </select>}
@@ -91,22 +95,22 @@ const Report = ({ dept}) => {
                         <input value={to} onChange={(e) => setTo(e.target.value)} type='month' />
                     </div>
                 </div>
-                <Button
-				component={Link}
-				href={{ pathname: "report", query: { from, to } }}
-				className="text-xl"
-				variant="filled"
-			>
-				Generate Report
-			</Button>
-                <Button
+                {!(auid === "All Author") && <Button
                     component={Link}
-                    href={{ pathname: `${auid}/details`, query: { from, to } }}
+                    href={{ pathname: `/author/${auid}/reportgen/report`, query: { from, to } }}
                     className="text-xl"
                     variant="filled"
                 >
                     Generate Report
-                </Button>
+                </Button>}
+                {auid === "All Author" && <Button
+                    component={Link}
+                    className="text-xl"
+                    variant="filled"
+                    href={{ pathname: `/dept/${deptnow}/reportgen/report/`, query: { from, to } }}
+                >
+                        Generate Report
+                </Button>}
             </div>
         </div>
     );

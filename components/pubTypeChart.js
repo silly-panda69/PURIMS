@@ -6,6 +6,9 @@ import { ResponsiveCirclePacking } from "@nivo/circle-packing";
 import Chip from "./UI/Chip";
 import Link from "next/link";
 import DocIcon from "@/icons/docIcon";
+import { useRef, useState } from "react";
+import { debounce } from "lodash";
+import Search_icon from "@/icons/Search_icon";
 
 export default function PubTypeChart({ baseURL, auid, data, classType = "", classChart = "" }) {
 	let key = "id";
@@ -25,6 +28,34 @@ export default function PubTypeChart({ baseURL, auid, data, classType = "", clas
 			metrics: d.metrics,
 		})),
 	};
+	const [record, setRecord] = useState(data);
+
+	const filter = debounce((searchText) => {
+		setRecord(data.filter((f) => f.label.toLowerCase().includes(searchText)));
+	}, 300);
+
+	// Handle the onChange event
+	const handleInputChange = (e) => {
+		const searchText = e.target.value.toLowerCase();
+		filter(searchText); // Call the filter function with the search text
+	};
+
+	const [isInputVisible, setIsInputVisible] = useState(false); // State to control input visibility
+
+	// Function to toggle input visibility when the search icon is clicked
+	const inputRef=useRef(null);
+	const toggleBtn=(e)=>{
+		if(inputRef.current){
+			setIsInputVisible((prevState) => !prevState);
+			if(isInputVisible){
+				console.log('yes');
+				inputRef.current.className="input-inner-on";
+			}else{
+				console.log('no');
+				inputRef.current.className="input-inner";
+			}
+		}
+	}
 	return (
 		<>
 			<Card className={classChart}>
@@ -116,9 +147,17 @@ export default function PubTypeChart({ baseURL, auid, data, classType = "", clas
 			</Card>
 			<Card className={classType}>
 				<CardContent>
-					<h2>Publications</h2>
+					<div className="flex justify-between align-">
+						{!isInputVisible && <h4>Publications</h4>}
+						<div className="input-inner" ref={inputRef}>
+							<input type="text" onChange={handleInputChange} placeholder="Search publications..."></input>
+							<button className="mb-0" onClick={toggleBtn}>
+								<Search_icon width="25" height="38" />
+							</button>	
+						</div>
+					</div>
 					<ol className="flex flex-col h-96 overflow-y-scroll">
-						{data.map(({ id, label, value, metrics }, i) => (
+						{record.map(({ id, label, value, metrics }, i) => (
 							<li key={i} data-pub-id={id} className="p-2 border-divider">
 								<details>
 									<summary className="block">
@@ -138,18 +177,24 @@ export default function PubTypeChart({ baseURL, auid, data, classType = "", clas
 										</div>
 										{metrics && (
 											<>
-												{metrics.impactFactorData?.metrics?.impactMetrics?.jif && (
-													<div className="flex flex-row items-center justify-between py-1">
-														<div className="flex-1">Impact Factor</div>
-														<div className="px-2">
-															{metrics.impactFactorData?.metrics?.impactMetrics?.jif}
+												{metrics.impactFactorData?.metrics?.impactMetrics
+													?.jif && (
+														<div className="flex flex-row items-center justify-between py-1">
+															<div className="flex-1">Impact Factor</div>
+															<div className="px-2">
+																{
+																	metrics.impactFactorData?.metrics?.impactMetrics
+																		?.jif
+																}
+															</div>
 														</div>
-													</div>
-												)}
+													)}
 												{metrics.citeScore && (
 													<div className="flex flex-row items-center justify-between py-1">
 														<div className="flex-1">CiteScore</div>
-														<div className="px-2">{metrics.citeScore.currentMetric}</div>
+														<div className="px-2">
+															{metrics.citeScore.currentMetric}
+														</div>
 													</div>
 												)}
 												{metrics.snip && (
@@ -164,25 +209,27 @@ export default function PubTypeChart({ baseURL, auid, data, classType = "", clas
 														<div className="px-2">{metrics.sjr.value}</div>
 													</div>
 												)}
-												{baseURL && <div className="flex flex-row items-center justify-between py-1">
-													<Chip
-														component={Link}
-														className="pubmed-chip"
-														icon={<DocIcon />}
-														href={`${baseURL}?page=1&sort=coverDate&order=descending&pub=${id}`}
-													>
+												{baseURL && (
+													<div className="flex flex-row items-center justify-between py-1">
+														<Chip
+															component={Link}
+															className="pubmed-chip"
+															icon={<DocIcon />}
+															href={`${baseURL}?page=1&sort=coverDate&order=descending&pub=${id}`}
+                            >
 														Documents
 													</Chip>
-												</div>}
-											</>
-										)}
-									</div>
-								</details>
-							</li>
-						))}
-					</ol>
-				</CardContent>
-			</Card>
+                          </div>
+                        )}
+									</>
+                    )}
+								</div>
+							</details>
+              </li>
+            ))}
+				</ol>
+			</CardContent>
+		</Card >
 		</>
 	);
 }

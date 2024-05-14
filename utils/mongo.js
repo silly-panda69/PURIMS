@@ -66,32 +66,6 @@ export const getAuthors = cache(
   }
 );
 
-// export const getShodh = cache(
-//   async ({
-//     dept = "pu",
-//     sort = "dc:date:awarded",
-//     order = "descending",
-//     regexp,
-//     page = 1,
-//     pageSize = 25,
-//   } = {}) => {
-//     let skip = (page - 1) * pageSize;
-//     let query = {
-//       dept: { $in: dept.split(",") },
-//       ...(regexp && { "dc:contributor:guide": new RegExp(regexp, "i") }),
-//     };
-//     if (dept == "pu" || dept == "") query = {};
-//     let count = await shodhganga.countDocuments(query);
-//     let results = await shodhganga
-//       .find(query)
-//       .sort(sort, order)
-//       .skip(skip)
-//       .limit(pageSize)
-//       .toArray();
-//     return { count, results };
-//   }
-// );
-//shodganga chages for searchbar 
 export const getShodh = cache(
   async ({
     dept = null,
@@ -101,7 +75,6 @@ export const getShodh = cache(
     page = 1,
     pageSize = 25,
   } = {}) => {
-
     let skip = (page - 1) * pageSize;
     let query = {
       ...(dept && { dept: { $in: dept.split(",") } }),
@@ -157,9 +130,9 @@ export const getShodhAuthor = cache(
             "dc:contributor:guide": {
               $regex: lastName
                 ? new RegExp(
-                  `${firstName} ${lastName}|${lastName} ${firstName}|${firstName}, ${lastName}|${lastName}, ${firstName}`,
-                  "i"
-                )
+                    `${firstName} ${lastName}|${lastName} ${firstName}|${firstName}, ${lastName}|${lastName}, ${firstName}`,
+                    "i"
+                  )
                 : new RegExp(`${firstName}`, "i"),
             },
           },
@@ -196,7 +169,6 @@ export const getShodhAuthor = cache(
     return { count, results };
   }
 );
-
 
 export const getProjects = cache(
   async ({
@@ -427,23 +399,34 @@ export const getDepartment = cache(async (dept) => {
   return result || error;
 });
 
-export const getAuthorsByDept = cache(async (dept) => {
+export const getAuthorsByDept = cache(async (
+  dept,
+  page = 1,
+  pageSize = 10,
+  order = "descending"
+) => {
   let result;
+  let skip = (page - 1) * pageSize;
   if (dept === 'pu') {
     result = await authors
       .find()
-      .sort("citationCount", "descending")
+      .sort("docCount", order)
+      .skip(skip)
+      .limit(pageSize)
       .toArray();
   }
   else {
     result = await authors
       .find({ ...(dept && { dept }) })
-      .sort("citationCount", "descending")
+      .sort("docCount", order)
+      .skip(skip)
+      .limit(pageSize)
       .toArray();
   }
   for (let auth of result) delete auth.charts;
   return result;
 });
+
 
 export const getDocRefsByScopusID = cache(async (id) => {
   let doc = await reference.findOne({ _id: id });
@@ -1067,7 +1050,7 @@ export const getDepartmentSubjectChart = cache(
 );
 
 export const getDepartmentPubChart = cache(async (dept, { from, to } = {}) => {
-  const start=performance.now();
+  const start = performance.now();
   let chart = await documents
     .aggregate([
       {
@@ -1137,9 +1120,9 @@ export const getDepartmentPubChart = cache(async (dept, { from, to } = {}) => {
       },
     ])
     .toArray();
-    const end=performance.now();
-    console.log("Time taken to fetch data from DB: "+(end-start)+"ms");
-    return chart;
+  const end = performance.now();
+  console.log("Time taken to fetch data from DB: " + (end - start) + "ms");
+  return chart;
 });
 
 export const getDepartmentWorldChart = cache(
@@ -1840,11 +1823,11 @@ export const checkNewUser = async (auid) => {
   }
 }
 
-export const getAuthDocs=async(auid)=>{
-  const result=await documents.findOne({"authors.auid": auid});
-  if(result?.auid){
+export const getAuthDocs = async (auid) => {
+  const result = await documents.findOne({ "authors.auid": auid });
+  if (result?.auid) {
     return result;
-  }else{
+  } else {
     return null;
   }
 }
@@ -1878,7 +1861,7 @@ export const insertDocuments = async (data, response, scopusID) => {
           "Content-Type": "application/json",
         },
       });
-      let doc_depts=[];
+      let doc_depts = [];
       if (plumx.status === 200) {
         plumx = await plumx.json();
         plumx = plumx["count_categories"];
@@ -1942,12 +1925,12 @@ export const insertDocuments = async (data, response, scopusID) => {
         const authCheck = await getAuthDocs(data23[i]["@auid"]);
         const checkAuth = await authors.findOne({ scopusID: data23[i]["@auid"] });
         if (authCheck?.auid) {
-          let doc_auth=authCheck?.authors?.map((e)=>{
-            if(e?.auid===data23[i]["@auid"]){
+          let doc_auth = authCheck?.authors?.map((e) => {
+            if (e?.auid === data23[i]["@auid"]) {
               return doc_auth;
             }
           });
-          doc_auth=doc_auth[0];
+          doc_auth = doc_auth[0];
           data2.push({
             givenName: doc_auth.givenName,
             initials: doc_auth.initials,
@@ -1958,8 +1941,8 @@ export const insertDocuments = async (data, response, scopusID) => {
             affiliation: doc_auth.affiliation,
             inDb: checkAuth ? true : false
           });
-          const new_arr=doc_depts.concat(doc_auth?.affiliation?.organization);
-          doc_depts=new_arr;
+          const new_arr = doc_depts.concat(doc_auth?.affiliation?.organization);
+          doc_depts = new_arr;
         } else {
           let author_data = await fetch(`https://api.elsevier.com/content/author/author_id/${data23[i]["@auid"]}?apiKey=${scopus_key}`, {
             headers: {
@@ -2026,8 +2009,8 @@ export const insertDocuments = async (data, response, scopusID) => {
               ],
               inDb: checkAuth ? true : false
             });
-            const new_arr=doc_depts.concat(affdata);
-            doc_depts=new_arr;
+            const new_arr = doc_depts.concat(affdata);
+            doc_depts = new_arr;
 
           }
         }
@@ -2079,7 +2062,7 @@ export const insertDocuments = async (data, response, scopusID) => {
             citedByCount: refs ? refs["message"]["is-referenced-by-count"] : 0,
             funder: funders ? funders : [],
           },
-          departments: doc_depts?doc_depts:[],
+          departments: doc_depts ? doc_depts : [],
           coverDate: new Date(data[i]["prism:coverDate"]),
           correspondence: [],
           authorCount: data2.length,
