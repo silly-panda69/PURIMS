@@ -6,7 +6,7 @@ import { ResponsiveCirclePacking } from "@nivo/circle-packing";
 import Chip from "./UI/Chip";
 import Link from "next/link";
 import DocIcon from "@/icons/docIcon";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { debounce } from "lodash";
 import Search_icon from "@/icons/Search_icon";
 
